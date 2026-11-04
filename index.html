@@ -1,0 +1,1650 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Chris McNutt</title>
+<meta name="description" content="Chris McNutt: education projects, websites and games, drawn as wireframes.">
+<link rel="canonical" href="https://chrismcnutt.me/">
+<link rel="icon" href="media/icon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="media/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="media/apple-touch-icon.png">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Chris McNutt">
+<meta property="og:description" content="Education projects, websites and games, drawn as wireframes.">
+<meta property="og:url" content="https://chrismcnutt.me/">
+<meta property="og:image" content="https://chrismcnutt.me/media/og.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="A wireframe drawing of a schoolhouse with students doing projects in the yard, beside Chris McNutt's name">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Brygada+1918:ital,wght@0,400..700;1,400..700&display=swap">
+<style>
+/* Registered so the script can read them back in pixels */
+@property --lead { syntax: "<length>"; inherits: true; initial-value: 0px; }
+@property --slide { syntax: "<length>"; inherits: true; initial-value: 0px; }
+@property --words { syntax: "<length>"; inherits: true; initial-value: 0px; }
+@property --story { syntax: "<length>"; inherits: true; initial-value: 0px; }
+:root {
+  /* Layout: a bar across the top; below it the projects play like slides, each filling the window. Words on the left with the
+     scene's story under them, the wireframe scene on the right, so text never sits over a drawing. No boxes anywhere. */
+  --paper: #ffffff;
+  --ink: #000000;
+  --soft: rgba(0, 0, 0, .62);
+  --rule: rgba(0, 0, 0, .2);
+  --dots: rgba(0, 0, 0, .08);
+  --shade: rgba(0, 0, 0, .07);
+  --type: "Brygada 1918", "Iowan Old Style", Georgia, serif;
+  --gap: clamp(16px, 2vw, 28px);
+  --pad: clamp(16px, 3vw, 40px);
+  --wide: 1440px;
+  --head: 92px;
+  --text: clamp(340px, 36vw, 460px); /* the text column on the left of each slide */
+  /* Scroll lengths for each project: pulled in from the right, words arriving, a pause before the next */
+  --pin: calc(100dvh - var(--head));
+  --slide: 45vh;
+  --words: 30vh;
+  --hold: 10vh;
+  color-scheme: light;
+}
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-behavior: auto; }
+body, .bar {
+  background-color: var(--paper);
+  background-image: radial-gradient(var(--dots) 1px, transparent 1.5px);
+  background-size: 22px 22px;
+  background-attachment: fixed;
+}
+body {
+  margin: 0;
+  color: var(--ink);
+  font-family: var(--type);
+  font-size: 18px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+::selection { background: rgba(0, 0, 0, .14); }
+h1, h2, h3, h4 { margin: 0; text-wrap: balance; }
+p { margin: 0; }
+a { color: inherit; }
+:focus-visible { outline: 1.5px dashed var(--ink); outline-offset: 4px; }
+
+.link { font-weight: 600; text-decoration: underline 1px; text-underline-offset: 5px; }
+.link:hover { text-decoration-thickness: 2px; }
+/* Not a link yet: shaded like a current section, with its padding in the margin so the words line up with the text */
+.soon { margin-left: -8px; padding: 1px 8px; font-weight: 600; color: var(--soft); background: var(--shade); cursor: default; }
+
+/* The bar across the top: the name, the sections beside it, and under them the projects in the section on screen */
+.bar {
+  position: fixed;
+  inset: 0 0 auto;
+  z-index: 10;
+  height: var(--head);
+  padding: 12px max(var(--pad), calc((100% - var(--wide)) / 2 + var(--pad)));
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-rows: 1fr 1fr;
+  align-items: center;
+  column-gap: 32px;
+}
+.name { grid-row: 1 / 3; font-size: clamp(26px, 2.3vw, 34px); font-weight: 700; line-height: 1; letter-spacing: -0.015em; }
+.name a { text-decoration: none; }
+.groups, .projects ul { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 2px 10px; margin: 0 -8px 0 0; padding: 0; list-style: none; }
+.projects ul { display: none; }
+.projects ul.on { display: flex; }
+/* The padding sits in the margin so the words line up whether or not they are shaded */
+.bar nav a { display: inline-grid; justify-items: center; padding: 1px 8px; color: var(--soft); text-decoration: none; transition: background-color .15s; }
+/* Each link keeps the width of its bold self, so the shade fits every one alike and nothing shifts as it moves */
+.bar nav a::after { content: attr(data-label); font-weight: 700; height: 0; overflow: hidden; visibility: hidden; }
+.groups a { font-size: 16px; font-weight: 600; }
+.projects a { font-size: 15px; }
+.bar nav a:hover { color: var(--ink); }
+.bar nav a[aria-current="true"] { color: var(--ink); font-weight: 700; background: var(--shade); }
+.projects a:has(.logo) { grid-template-columns: auto auto; column-gap: 6px; align-items: center; }
+.projects a:has(.logo)::after { grid-column: 2; }
+.projects .logo { width: 1.1em; height: 1.1em; opacity: 0.62; }
+.projects a:hover .logo, .projects a[aria-current="true"] .logo { opacity: 1; }
+
+.main { padding-top: var(--head); }
+.group { display: grid; gap: var(--gap); scroll-margin-top: var(--head); }
+/* In a group of projects the bar already names the section, so its title is kept for screen readers only */
+.group:has(.project) > .group-title { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+/* Websites, About me and Contact each fill the window, centered */
+.group:not(:has(.project)) { min-height: var(--pin); align-content: center; justify-items: center; text-align: center; padding: 48px var(--pad); }
+.group-title { font-size: clamp(36px, 3.4vw, 54px); font-weight: 700; line-height: 1; letter-spacing: -0.015em; padding-top: 6px; }
+.group-title::after { content: ""; display: block; width: 56px; margin-top: 14px; border-top: 1.5px solid var(--ink); }
+.group:not(:has(.project)) > .group-title::after { margin-inline: auto; }
+
+/* Projects play like slides. The first in each group rises into place with the page; each one after it is pulled in
+   from the right, pushing the one before out to the left. Once a project is in, its words arrive one piece at a time. */
+.project {
+  --lead: var(--slide); /* scroll from pinning until its words begin */
+  --out: var(--slide);  /* scroll at the end while the next project pushes it out */
+  --story: 0px;         /* extra scroll for a project whose scenes play out as you go */
+  position: relative;
+  height: calc(var(--pin) + var(--lead) + var(--words) + var(--story) + var(--hold) + var(--out));
+  /* Overlap the project before, so this one pins while that one is still pinned */
+  margin-top: calc(-1 * (var(--pin) + var(--slide) + var(--gap)));
+  /* Links land with the project in place and all its words shown */
+  scroll-margin-top: calc(var(--head) - var(--lead) - var(--words));
+  overflow: clip;
+  pointer-events: none;
+}
+.project:first-of-type { --lead: -35vh; margin-top: 0; }
+.project:last-of-type { --out: 0px; }
+/* Once its words are in, each project plays out as you keep scrolling, its notes arriving with each moment.
+   Polaris walks through its three experiments in turn, so it runs longest. */
+#hrp { --story: 70vh; }
+#polaris { --story: 210vh; }
+#tclc { --story: 80vh; }
+#palisade { --story: 60vh; }
+.pin {
+  position: sticky;
+  top: var(--head);
+  height: var(--pin);
+  pointer-events: auto;
+  /* Words, then the story under them, centered down the left; the scene fills the right */
+  display: grid;
+  grid-template-columns: minmax(0, var(--text)) minmax(0, 1fr);
+  grid-template-rows: 1fr auto auto 1fr;
+  column-gap: clamp(12px, 2vw, 40px);
+  /* Lined up with the bar on the left; on the right the scene runs to the window's edge */
+  padding: 0 0 0 max(var(--pad), calc((100% - var(--wide)) / 2 + var(--pad)));
+  /* --x: 1 waiting off to the right, 0 in place, -1 pushed out to the left */
+  transform: translateX(calc(var(--x, 0) * (100% + var(--gap) * 3)));
+}
+.stage { grid-column: 2; grid-row: 1 / -1; position: relative; min-height: 0; touch-action: pan-y; }
+.stage canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.fallback { position: absolute; right: 0; top: 0; font-size: 14px; color: var(--soft); }
+.copy {
+  grid-column: 1;
+  grid-row: 2;
+  display: grid;
+  gap: 14px;
+  justify-items: start;
+  pointer-events: none;
+}
+.copy > * {
+  pointer-events: auto;
+  opacity: var(--show, 0);
+  transform: translateX(calc((1 - var(--show, 0)) * 40px));
+}
+.copy h3 { font-size: clamp(30px, 3vw, 48px); font-weight: 700; line-height: 1.02; letter-spacing: -0.015em; display: flex; align-items: center; gap: 0.4em; }
+/* Each project's own symbol, in black, beside its name */
+.logo { flex: none; width: 1.2em; height: 1.2em; }
+.copy p { color: var(--soft); }
+
+.experiments { display: grid; gap: 6px; margin-top: 4px; }
+.experiments h4 { font-size: 15px; font-weight: 700; color: var(--soft); }
+.exp-list { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 4px 18px; }
+.exp { font-size: 16px; font-weight: 600; padding: 1px 8px; margin-left: -8px; text-decoration: none; transition: background-color .15s; }
+.exp:hover { text-decoration: underline 1px; text-underline-offset: 4px; }
+.exp[aria-current="true"] { font-weight: 700; background: var(--shade); }
+/* Notes on the scene sit under the words, set off by a rule. Polaris's three share one spot, so nothing moves as one
+   experiment hands over to the next. Each line arrives with its moment in the scene and holds its place until then; the newest is in ink. */
+.notes {
+  grid-column: 1;
+  grid-row: 3;
+  margin-top: clamp(20px, 3.5vh, 36px);
+  padding-top: clamp(16px, 2.5vh, 24px);
+  border-top: 1px solid var(--rule);
+  display: grid;
+  opacity: var(--show, 0);
+  transform: translateX(calc((1 - var(--show, 0)) * 40px));
+}
+.note { grid-area: 1 / 1; display: grid; gap: 8px; align-content: start; opacity: var(--fade, 1); }
+.note:not(.on) { visibility: hidden; }
+.lede { font-size: 16px; font-weight: 600; }
+.beats { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; font-size: 16px; color: var(--soft); }
+.beats li { opacity: var(--beat, 1); transform: translateX(calc((1 - var(--beat, 1)) * 24px)); transition: color .2s; }
+.beats li.now { color: var(--ink); }
+
+
+/* Websites: each site's front page in a drawn browser window. Once the row reaches the top it holds there, and scrolling
+   carries the windows across from right to left before the page moves on. */
+#websites { display: block; min-height: 0; padding: 0; text-align: left; justify-items: normal; align-content: normal; }
+.reel { position: relative; height: calc(var(--pin) + var(--travel, 0px)); }
+.reel-pin { position: sticky; top: var(--head); height: var(--pin); overflow: hidden; display: grid; grid-template-columns: minmax(0, 1fr); align-content: center; gap: clamp(20px, 4vh, 40px); }
+.reel .group-title { text-align: center; }
+.reel .group-title::after { margin-inline: auto; }
+.shots {
+  --shot: min(58vw, (var(--pin) - 230px) * 1.6);
+  list-style: none;
+  margin: 0;
+  padding: 0 max(var(--pad), calc((100% - var(--wide)) / 2 + var(--pad)));
+  display: flex;
+  gap: clamp(28px, 4vw, 64px);
+  width: max-content;
+  transform: translateX(var(--reel-x, 0px));
+}
+.shot { width: var(--shot); display: grid; gap: 12px; }
+.window { display: block; border: 1.5px solid var(--ink); background: var(--paper); }
+.chrome { display: flex; align-items: center; gap: 6px; height: 28px; padding: 0 12px; border-bottom: 1.5px solid var(--ink); font-size: 13px; color: var(--soft); }
+.chrome i { width: 9px; height: 9px; border: 1.5px solid var(--ink); border-radius: 50%; }
+.chrome .url { margin-left: 10px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.window video { display: block; width: 100%; height: auto; aspect-ratio: 16 / 10; object-fit: cover; object-position: top; }
+.shot-text { display: flex; align-items: baseline; gap: 6px 18px; flex-wrap: wrap; }
+.shot-text .sl-name { font-size: 22px; font-weight: 700; line-height: 1.2; }
+.shot-text .about { flex-basis: 100%; color: var(--soft); font-size: 16px; }
+
+.prose { max-width: 56ch; display: grid; gap: 14px; }
+.email { font-size: clamp(22px, 2.4vw, 34px); font-weight: 600; text-decoration: underline 1px; text-underline-offset: 6px; overflow-wrap: anywhere; }
+.email:hover { text-decoration-thickness: 2px; }
+
+/* Short windows: tighter type in the text column, so a slide's words and story always fit beside its scene */
+@media (min-width: 861px) and (max-height: 780px) {
+  .copy { gap: 10px; }
+  .copy h3 { font-size: clamp(26px, 2.6vw, 36px); }
+  .copy p { font-size: 16px; line-height: 1.45; }
+  .notes { margin-top: 14px; padding-top: 12px; }
+  .lede, .beats { font-size: 15px; line-height: 1.45; }
+}
+@media (max-width: 860px) {
+  .bar { position: static; height: auto; grid-template-columns: 1fr; grid-template-rows: none; row-gap: 12px; padding: 20px var(--pad); }
+  .name { grid-row: auto; }
+  .groups { justify-content: flex-start; margin: 0 0 0 -8px; }
+  .projects { display: none; }
+  .main { padding-top: 0; display: grid; gap: 56px; padding-bottom: 56px; }
+  .group, .group:not(:has(.project)) { scroll-margin-top: 0; padding: 0 var(--pad); min-height: 0; }
+  .group:has(.project) > .group-title { position: static; width: auto; height: auto; overflow: visible; clip-path: none; white-space: normal; }
+  .project { height: auto; margin-top: 0; overflow: visible; pointer-events: auto; scroll-margin-top: var(--gap); }
+  .pin { position: static; height: auto; grid-template-columns: minmax(0, 1fr); grid-template-rows: none; gap: 16px; padding: 0; transform: none; }
+  .stage, .copy, .notes { grid-column: 1; grid-row: auto; }
+  .stage { height: clamp(260px, 78vw, 62vh); }
+  .copy > * { opacity: 1; transform: none; }
+  .notes { margin-top: 8px; opacity: 1; transform: none; }
+  .beats li { transform: none; } /* a sideways start here would push past the screen's edge */
+  .email { font-size: min(22px, 5.2vw); } /* the whole address stays on one line */
+  #websites { padding: 0 var(--pad); }
+  .reel { height: auto; }
+  .reel-pin { position: static; height: auto; overflow: visible; }
+  .shots { flex-direction: column; width: auto; padding: 0; transform: none; }
+  .shot { width: auto; }
+  .note:not(.on) { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .copy > *, .notes { opacity: 1; transform: none; }
+  .bar nav a, .exp, .beats li { transition: none; }
+}
+</style>
+<!-- Without scripts nothing slides or plays, so the projects stack and all their words show -->
+<noscript><style>
+.project { height: auto; margin-top: 0; overflow: visible; pointer-events: auto; scroll-margin-top: var(--head); }
+.pin { position: static; display: block; height: auto; padding: 32px var(--pad); transform: none; }
+.stage { display: none; }
+.copy > *, .notes { opacity: 1; transform: none; }
+.notes { display: block; }
+.note:not(.on) { display: block; visibility: visible; margin-top: 12px; }
+.reel { height: auto; }
+.reel-pin { position: static; height: auto; overflow: visible; }
+.shots { flex-wrap: wrap; width: auto; transform: none; }
+</style></noscript>
+</head>
+<body>
+
+<div class="site">
+  <header class="bar">
+    <h1 class="name"><a href="#">Chris McNutt</a></h1>
+    <nav class="groups" aria-label="Sections">
+      <a href="#education">Education</a>
+      <a href="#websites">Websites</a>
+      <a href="#games">Games</a>
+      <a href="#about">About me</a>
+      <a href="#contact">Contact</a>
+    </nav>
+    <nav class="projects" aria-label="Projects in this section">
+      <ul data-group="education">
+        <li><a href="#hrp"><img class="logo" src="media/logos/hrp.png" alt="" width="128" height="128">Human Restoration Project</a></li>
+        <li><a href="#polaris"><img class="logo" src="media/logos/polaris.png" alt="" width="128" height="128">Polaris Education</a></li>
+        <li><a href="#tclc"><img class="logo" src="media/logos/tclc.png" alt="" width="128" height="128">Third Coast Learning Collaborative</a></li>
+      </ul>
+      <ul data-group="games">
+        <li><a href="#palisade"><img class="logo" src="media/logos/palisade.png" alt="" width="128" height="128">Palisade</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main class="main">
+    <section class="group" id="education" aria-labelledby="education-title">
+      <h2 class="group-title" id="education-title">Education</h2>
+
+      <article class="project" id="hrp" aria-labelledby="hrp-title">
+        <div class="pin">
+          <div class="stage" data-scene="interviews" role="img" aria-label="Wireframe empathy interviews: in three circles an adult with a clipboard asks a question, a student answers in a speech bubble, and the adult takes notes"><p class="fallback">Loading</p></div>
+          <div class="copy">
+            <h3 id="hrp-title"><img class="logo" src="media/logos/hrp.png" alt="" width="128" height="128">Human Restoration Project</h3>
+            <p>A nonprofit for progressive education. Essays, a podcast and free resources that help teachers build more human-centered schools.</p>
+            <a class="link" href="https://humanrestorationproject.org/" target="_blank" rel="noopener">Visit site</a>
+          </div>
+          <div class="notes">
+            <div class="note" data-scene="interviews">
+              <p class="lede">Listening to young people, educators and communities, then reimagining what school could be.</p>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <article class="project" id="polaris" aria-labelledby="polaris-title">
+        <div class="pin">
+          <div class="stage" data-scenes="pathways build challenge" role="img" aria-label="Wireframe scenes of each Polaris experiment. Pathways, shown first: students talk about what they love, gather by career cluster and send their answers up into constellations, then each group walks a path to a training program and local employer"><p class="fallback">Loading</p></div>
+          <div class="copy">
+            <h3 id="polaris-title"><img class="logo" src="media/logos/polaris.png" alt="" width="128" height="128">Polaris Education</h3>
+            <p>Listening tools that help organizations hear from every person and act on what they hear.</p>
+            <a class="link" href="https://polariseducation.ai/" target="_blank" rel="noopener">Visit site</a>
+            <div class="experiments">
+              <h4 id="polaris-exp-title">Polaris experiments</h4>
+              <ul class="exp-list" aria-labelledby="polaris-exp-title">
+                <li><a class="exp" href="#pathways" data-scene="pathways" aria-current="true">Pathways</a></li>
+                <li><a class="exp" href="#build" data-scene="build" aria-current="false">Build</a></li>
+                <li><a class="exp" href="#design-challenge" data-scene="challenge" aria-current="false">Design Challenge</a></li>
+              </ul>
+            </div>
+          </div>
+          <!-- Notes: what each experiment is, then a line for each moment of its scene; data-at is how far through the scene that moment arrives -->
+          <div class="notes">
+            <div class="note" data-scene="pathways">
+              <p class="lede">One-on-one career conversations that connect what students love to real careers, and to the CTE pathways that lead there.</p>
+              <ol class="beats">
+                <li data-at="0">Each student talks through what they love and what they're good at.</li>
+                <li data-at="0.2">Polaris matches them to careers and groups them by career cluster.</li>
+                <li data-at="0.38">Their answers rise into a “Career Constellation.”</li>
+                <li data-at="0.65">Each cluster opens a CTE pathway to a program and a local employer.</li>
+                <li data-at="0.8">Students work through aligned activities toward real training and real jobs.</li>
+              </ol>
+            </div>
+            <div class="note" data-scene="build">
+              <p class="lede">A physical augmented reality system where a team designs a reimagined school based on recorded conversations.</p>
+              <ol class="beats">
+                <li data-at="0">Everyone says what the new space should feel like.</li>
+                <li data-at="0.36">Their words gather into themes and ideas.</li>
+                <li data-at="0.7">Groups design their school with physical materials, which are turned into “walkable” 3D spaces.</li>
+              </ol>
+            </div>
+            <div class="note" data-scene="challenge">
+              <p class="lede">A design sprint where students solve a problem together.</p>
+              <ol class="beats">
+                <li data-at="0">Students are tasked with a problem.</li>
+                <li data-at="0.12">They work together to find solutions.</li>
+                <li data-at="0.47">They photograph their solution and are challenged to change ideas.</li>
+                <li data-at="0.73">Polaris shows the skills they used throughout.</li>
+              </ol>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <article class="project" id="tclc" aria-labelledby="tclc-title">
+        <div class="pin">
+          <div class="stage" data-scene="schoolyard" role="img" aria-label="A wireframe school with students doing projects in the yard out front: tending a garden bed, raising a wooden frame, presenting a chart on an easel and flying a kite"><p class="fallback">Loading</p></div>
+          <div class="copy">
+            <h3 id="tclc-title"><img class="logo" src="media/logos/tclc.png" alt="" width="128" height="128">Third Coast Learning Collaborative</h3>
+            <p>West Michigan schools reimagining public education together.</p>
+            <a class="link" href="https://thirdcoastlearning.org" target="_blank" rel="noopener">Visit site</a>
+          </div>
+          <div class="notes">
+            <div class="note" data-scene="schoolyard">
+              <p class="lede">Schools working together to make learning more creative, authentic, and relevant.</p>
+              <ol class="beats">
+                <li data-at="0">Schools across West Michigan, reimagining public education.</li>
+                <li data-at="0.22">Project- and place-based.</li>
+                <li data-at="0.62">With portfolio-based assessment.</li>
+              </ol>
+            </div>
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <section class="group" id="websites" aria-labelledby="websites-title">
+      <div class="reel">
+        <div class="reel-pin">
+          <h2 class="group-title" id="websites-title">Websites</h2>
+          <ul class="shots">
+          <li class="shot">
+            <a class="window" href="https://www.humanrestorationproject.org/" target="_blank" rel="noopener" tabindex="-1" aria-hidden="true">
+              <span class="chrome"><i></i><i></i><i></i><span class="url">humanrestorationproject.org</span></span>
+              <video src="media/sites/hrp.mp4" poster="media/sites/hrp.jpg" width="1440" height="900" muted loop playsinline preload="none"></video>
+            </a>
+            <div class="shot-text">
+              <span class="sl-name">Human Restoration Project</span>
+              <a class="link" href="https://www.humanrestorationproject.org/" target="_blank" rel="noopener" aria-label="Visit humanrestorationproject.org">Visit</a>
+              <span class="about">A nonprofit for progressive education.</span>
+            </div>
+          </li>
+          <li class="shot">
+            <a class="window" href="https://www.floopedu.com/" target="_blank" rel="noopener" tabindex="-1" aria-hidden="true">
+              <span class="chrome"><i></i><i></i><i></i><span class="url">floopedu.com</span></span>
+              <video src="media/sites/floop.mp4" poster="media/sites/floop.jpg" width="1440" height="900" muted loop playsinline preload="none"></video>
+            </a>
+            <div class="shot-text">
+              <span class="sl-name">Floop</span>
+              <a class="link" href="https://www.floopedu.com/" target="_blank" rel="noopener" aria-label="Visit floopedu.com">Visit</a>
+              <span class="about">Meaningful feedback on student learning.</span>
+            </div>
+          </li>
+          <li class="shot">
+            <a class="window" href="https://www.thirdcoastlearning.org/" target="_blank" rel="noopener" tabindex="-1" aria-hidden="true">
+              <span class="chrome"><i></i><i></i><i></i><span class="url">thirdcoastlearning.org</span></span>
+              <video src="media/sites/tclc.mp4" poster="media/sites/tclc.jpg" width="1440" height="900" muted loop playsinline preload="none"></video>
+            </a>
+            <div class="shot-text">
+              <span class="sl-name">Third Coast Learning Collaborative</span>
+              <a class="link" href="https://www.thirdcoastlearning.org/" target="_blank" rel="noopener" aria-label="Visit thirdcoastlearning.org">Visit</a>
+              <span class="about">Reimagining public education in West Michigan.</span>
+            </div>
+          </li>
+          <li class="shot">
+            <a class="window" href="https://www.learninspired.org/" target="_blank" rel="noopener" tabindex="-1" aria-hidden="true">
+              <span class="chrome"><i></i><i></i><i></i><span class="url">learninspired.org</span></span>
+              <video src="media/sites/learninspired.mp4" poster="media/sites/learninspired.jpg" width="1440" height="900" muted loop playsinline preload="none"></video>
+            </a>
+            <div class="shot-text">
+              <span class="sl-name">Learning InspirED</span>
+              <a class="link" href="https://www.learninspired.org/" target="_blank" rel="noopener" aria-label="Visit learninspired.org">Visit</a>
+              <span class="about">Helping districts build student agency.</span>
+            </div>
+          </li>
+          <li class="shot">
+            <a class="window" href="https://www.angelastockman.com/" target="_blank" rel="noopener" tabindex="-1" aria-hidden="true">
+              <span class="chrome"><i></i><i></i><i></i><span class="url">angelastockman.com</span></span>
+              <video src="media/sites/stockman.mp4" poster="media/sites/stockman.jpg" width="1440" height="900" muted loop playsinline preload="none"></video>
+            </a>
+            <div class="shot-text">
+              <span class="sl-name">Angela Stockman</span>
+              <a class="link" href="https://www.angelastockman.com/" target="_blank" rel="noopener" aria-label="Visit angelastockman.com">Visit</a>
+              <span class="about">Teacher, author and professional learning facilitator.</span>
+            </div>
+          </li>
+          <li class="shot">
+            <a class="window" href="https://www.susanblum.com/" target="_blank" rel="noopener" tabindex="-1" aria-hidden="true">
+              <span class="chrome"><i></i><i></i><i></i><span class="url">susanblum.com</span></span>
+              <video src="media/sites/blum.mp4" poster="media/sites/blum.jpg" width="1440" height="900" muted loop playsinline preload="none"></video>
+            </a>
+            <div class="shot-text">
+              <span class="sl-name">Susan D. Blum</span>
+              <a class="link" href="https://www.susanblum.com/" target="_blank" rel="noopener" aria-label="Visit susanblum.com">Visit</a>
+              <span class="about">Author, anthropologist and educator.</span>
+            </div>
+          </li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="group" id="games" aria-labelledby="games-title">
+      <h2 class="group-title" id="games-title">Games</h2>
+      <article class="project" id="palisade" aria-labelledby="palisade-title">
+        <div class="pin">
+          <div class="stage" data-scene="palisade" role="img" aria-label="Two screens of Palisade footage traced into line art: on the left the Ambassador walks a wood-paneled room as words appear on the wall; on the right the Operator picks those words at a desktop terminal. A signal passes between the screens"><p class="fallback">Loading</p></div>
+          <div class="copy">
+            <h3 id="palisade-title"><img class="logo" src="media/logos/palisade.png" alt="" width="128" height="128">Palisade</h3>
+            <p>A two-player co-op puzzle game built in Godot. Players work through randomized “deliverables” as quickly as possible.</p>
+            <span class="soon">Coming soon</span>
+          </div>
+          <div class="notes">
+            <div class="note" data-scene="palisade">
+              <p class="lede">A two-player co-op game about communication.</p>
+              <ol class="beats">
+                <li data-at="0">One player walks the office as the Ambassador.</li>
+                <li data-at="0.28">While the other works their office terminal as the Operator.</li>
+              </ol>
+            </div>
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <section class="group" id="about" aria-labelledby="about-title">
+      <h2 class="group-title" id="about-title">About me</h2>
+      <div class="prose">
+        <p>I was a classroom teacher before I started Human Restoration Project. Now I work with teachers, students and school leaders on making school more humane, and I build tools that help them do it.</p>
+      </div>
+    </section>
+
+    <section class="group" id="contact" aria-labelledby="contact-title">
+      <h2 class="group-title" id="contact-title">Contact</h2>
+      <a class="email" href="mailto:chris@humanrestorationproject.org">chris@humanrestorationproject.org</a>
+    </section>
+  </main>
+</div>
+
+<script>
+(() => {
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const narrow = matchMedia('(max-width: 860px)');
+  const projects = [...document.querySelectorAll('.project')];
+  const cards = [...document.querySelectorAll('.project, #websites, #about, #contact')];
+  const links = new Map([...document.querySelectorAll('.bar nav a')].map(a => [a.hash.slice(1), a]));
+  const lists = [...document.querySelectorAll('.projects ul')];
+  links.forEach(a => { a.dataset.label = a.textContent; });
+  let shown = null;
+  const groupOf = { hrp: 'education', polaris: 'education', tclc: 'education', palisade: 'games' };
+
+  // Polaris experiments: scrolling walks through Pathways, Build and Design Challenge in turn. Each is a link
+  // (#pathways, #build, #design-challenge) that jumps the scroll to it, whether clicked or opened from the address bar.
+  // On narrow screens, where nothing pins, it swaps the scene instead.
+  const experiments = new Map([...document.querySelectorAll('.exp')].map(chip => [chip.hash, chip]));
+  function visit(chip, arriving) {
+    const card = chip.closest('.project'), sl = slides.get(card), i = sl.keys.indexOf(chip.dataset.scene);
+    if (narrow.matches) { sl.pick = chip.dataset.scene; if (arriving) card.scrollIntoView(); request(); return; }
+    const s = sl.top - card.getBoundingClientRect().top;
+    scrollBy(0, sl.lead + sl.words + sl.story * (i + 0.15) / sl.keys.length - s);
+  }
+  experiments.forEach(chip => chip.addEventListener('click', e => {
+    e.preventDefault();
+    history.replaceState(null, '', chip.hash);
+    visit(chip, false);
+  }));
+  addEventListener('hashchange', () => experiments.has(location.hash) && visit(experiments.get(location.hash), true));
+
+  // Every project is timed in pixels of scroll from the moment its panel pins (s = 0). The lengths come from the CSS.
+  const slides = new Map(projects.map(card => {
+    const pin = card.querySelector('.pin'), stage = pin.querySelector('.stage');
+    return [card, {
+      pin,
+      parts: [...pin.querySelector('.copy').children, ...pin.querySelectorAll('.notes')],
+      keys: (stage.dataset.scenes || stage.dataset.scene).split(' '),
+      chips: [...card.querySelectorAll('.exp')],
+      notes: [...card.querySelectorAll('.note')].map(el => ({
+        el,
+        key: el.dataset.scene,
+        beats: [...el.querySelectorAll('[data-at]')].map(li => ({ li, at: parseFloat(li.dataset.at) })),
+      })),
+      first: !card.previousElementSibling?.matches('.project'),
+      last: !card.nextElementSibling?.matches('.project'),
+    }];
+  }));
+  // Each window plays a short loop of its site's front page while it is in view; under reduced motion it holds still
+  const clips = new IntersectionObserver(entries => {
+    for (const e of entries) {
+      if (e.isIntersecting && !reduce) e.target.play().catch(() => {});
+      else e.target.pause();
+    }
+  }, { rootMargin: '0px 200px' });
+  document.querySelectorAll('.window video').forEach(v => clips.observe(v));
+  // The reel carries the windows across faster than the page scrolls, so it takes a little over half the scroll
+  const reel = document.querySelector('.reel'), shots = reel.querySelector('.shots'), PACE = 1.8;
+  let span = 0;
+  function lay() {
+    span = narrow.matches ? 0 : Math.max(0, shots.scrollWidth - reel.clientWidth);
+    reel.style.setProperty('--travel', span / PACE + 'px');
+    for (const [card, sl] of slides) {
+      const css = getComputedStyle(card);
+      sl.top = parseFloat(getComputedStyle(sl.pin).top);
+      sl.lead = parseFloat(css.getPropertyValue('--lead'));
+      sl.slide = parseFloat(css.getPropertyValue('--slide'));
+      sl.words = parseFloat(css.getPropertyValue('--words'));
+      sl.story = parseFloat(css.getPropertyValue('--story'));
+      sl.end = card.offsetHeight - sl.pin.offsetHeight; // where the panel lets go
+    }
+  }
+
+  // A card with several scenes says which one is on, and how far scrolling has come through it.
+  // Its note follows along: each line shows once its moment in the scene arrives, or all at once under reduced motion.
+  function choose(sl, card, key, phase, fade = 1) {
+    card.dataset.phase = phase.toFixed(4);
+    for (const note of sl.notes) {
+      const on = note.key === key;
+      note.el.classList.toggle('on', on);
+      if (!on) continue;
+      note.el.style.setProperty('--fade', fade.toFixed(3));
+      let now = null;
+      for (const b of note.beats) {
+        const show = reduce ? 1 : smooth(b.at - 0.03, b.at, phase);
+        b.li.style.setProperty('--beat', show.toFixed(3));
+        if (show > 0.5) now = b;
+      }
+      note.beats.forEach(b => b.li.classList.toggle('now', b === now));
+    }
+    if (card.dataset.scene === key) return;
+    card.dataset.scene = key;
+    sl.chips.forEach(c => c.setAttribute('aria-current', String(c.dataset.scene === key)));
+  }
+
+  const clamp01 = x => Math.min(1, Math.max(0, x));
+  const smooth = (a, b, x) => { const t = clamp01((x - a) / (b - a)); return t * t * (3 - 2 * t); };
+  let ticking = false;
+  function measure() {
+    ticking = false;
+    const vh = innerHeight, flat = narrow.matches;
+    const rects = cards.map(c => c.getBoundingClientRect());
+    let current = null;
+    cards.forEach((card, i) => {
+      const r = rects[i], sl = slides.get(card);
+      let x = 0;
+      if (sl && flat) {
+        // Stacked: the scene plays out over the stretch of scroll that carries it up through the window
+        card.dataset.built = smooth(vh * 0.95, vh * 0.3, r.top).toFixed(4);
+        card.dataset.time = ((vh - r.top) / 90).toFixed(3);
+        choose(sl, card, sl.pick || sl.keys[0], clamp01((vh * 0.7 - r.top) / (vh * 0.9)));
+      } else if (sl) {
+        const s = sl.top - r.top;
+        // Scroll is the scenes' clock too: walking, talking and turning all move with it, and run backward going back up
+        card.dataset.time = (s / 90).toFixed(3);
+        // Pulled in from the right over the first stretch of its pin, pushed out left over the last
+        const come = sl.first ? 1 : clamp01(s / sl.slide);
+        const go = sl.last ? 0 : clamp01((s - (sl.end - sl.slide)) / sl.slide);
+        x = go > 0 ? -go : 1 - come;
+        if (reduce) x = Math.round(x);
+        sl.pin.style.setProperty('--x', x.toFixed(4));
+        // The first scene builds as it rises into view; the others build as they slide in
+        let built = sl.first ? smooth(-0.8 * vh, -0.05 * vh, s) : smooth(sl.slide * 0.15, sl.slide + sl.words * 0.15, s);
+        if (sl.story > 0) {
+          // Once its words are in, scrolling on plays its scene out. Polaris plays each of its scenes in turn: one builds,
+          // plays out, and clears for the next
+          const p = clamp01((s - sl.lead - sl.words) / sl.story), n = sl.keys.length;
+          const i = Math.min(n - 1, Math.floor(p * n)), local = p * n - i;
+          if (i > 0) built = smooth(0, 0.1, local);
+          if (i < n - 1) built = Math.min(built, 1 - smooth(0.93, 1, local));
+          const fade = (i > 0 ? smooth(0, 0.05, local) : 1) * (i < n - 1 ? 1 - smooth(0.93, 1, local) : 1);
+          choose(sl, card, sl.keys[i], local, fade);
+        }
+        card.dataset.built = built.toFixed(4);
+        const n = sl.parts.length;
+        sl.parts.forEach((part, k) => part.style.setProperty('--show', smooth(sl.lead + sl.words * k / n, sl.lead + sl.words * (k + 0.7) / n, s).toFixed(3)));
+      }
+      if (Math.abs(x) < 0.5 && r.top <= vh * 0.5 && r.bottom > vh * 0.5) current = card.id;
+    });
+    if (!current && document.getElementById('contact').getBoundingClientRect().top < vh) current = 'contact';
+    if (!flat) {
+      const into = parseFloat(getComputedStyle(reel.firstElementChild).top) - reel.getBoundingClientRect().top;
+      shots.style.setProperty('--reel-x', -Math.min(span, Math.max(0, into) * PACE).toFixed(1) + 'px');
+    } else shots.style.removeProperty('--reel-x');
+    const group = groupOf[current];
+    links.forEach((a, id) => { if (id === current || id === group) a.setAttribute('aria-current', 'true'); else a.removeAttribute('aria-current'); });
+    // Under the sections, list the projects of the one on screen (none for Websites, About me and Contact)
+    const section = group || current;
+    if (section && section !== shown) {
+      shown = section;
+      lists.forEach(ul => ul.classList.toggle('on', ul.dataset.group === section));
+    }
+    document.dispatchEvent(new Event('progress'));
+  }
+  const request = () => { if (!ticking) { ticking = true; requestAnimationFrame(measure); } };
+  addEventListener('scroll', request, { passive: true });
+  addEventListener('resize', () => { lay(); request(); });
+  lay();
+  if (experiments.has(location.hash)) visit(experiments.get(location.hash), true);
+  measure();
+
+  // Tabbing into a project that is not in place yet scrolls to where it is, with all its words shown
+  projects.forEach(card => card.addEventListener('focusin', e => {
+    if (narrow.matches || !e.target.matches(':focus-visible')) return;
+    const sl = slides.get(card), s = sl.top - card.getBoundingClientRect().top, settled = sl.lead + sl.words;
+    if (s < settled || (!sl.last && s > sl.end - sl.slide)) scrollBy(0, settled - s);
+  }));
+
+  setTimeout(() => {
+    document.querySelectorAll('.fallback').forEach(f => { f.textContent = 'Didn’t load. Reload to try again.'; });
+  }, 10000);
+})();
+</script>
+
+<script type="module">
+import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
+
+// Every scene is drawn the same way: black lines, slanted hatching and dithered dots on white.
+// Each one builds itself as its section scrolls in (built: 0 → 1), then moves only as the page scrolls.
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const INK = new THREE.Color('#000000');
+const PAPER = new THREE.Color('#ffffff');
+const TAU = Math.PI * 2;
+const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+const smooth = (a, b, x) => { const t = clamp((x - a) / (b - a), 0, 1); return t * t * (3 - 2 * t); };
+const ease = t => t * t * (3 - 2 * t);
+const seeded = n => {
+  let s = n >>> 0;
+  return () => { s = (s + 0x6D2B79F5) >>> 0; let t = s; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+};
+const BAYER = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5];
+
+const seg = (out, a, b) => out.push(a[0], a[1], a[2], b[0], b[1], b[2]);
+// Hidden lines: solid things also get paper-colored faces, set just behind their edges, so whatever stands behind them is
+// hidden instead of showing through. While FACES.out holds an array, boxes, figures, bubbles and trees add their faces to it.
+const FACES = { out: null };
+// A flat face, fanned out from its first corner
+function solidFace(...pts) { if (FACES.out) for (let i = 1; i < pts.length - 1; i++) FACES.out.push(...pts[0], ...pts[i], ...pts[i + 1]); }
+function faces(flat = []) {
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.Float32BufferAttribute(flat, 3));
+  const m = new THREE.Mesh(g, new THREE.MeshBasicMaterial({ color: PAPER, side: THREE.DoubleSide, polygonOffset: true, polygonOffsetFactor: 1, polygonOffsetUnits: 1 }));
+  m.frustumCulled = false;
+  m.renderOrder = -1;
+  return m;
+}
+const lerp3 = (a, b, t) => [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t];
+function poly(out, pts, closed = true) { for (let i = 0; i < pts.length - (closed ? 0 : 1); i++) seg(out, pts[i], pts[(i + 1) % pts.length]); }
+function boxEdges(out, x, y, z, w, h, d) {
+  const x0 = x - w / 2, x1 = x + w / 2, y0 = y, y1 = y + h, z0 = z - d / 2, z1 = z + d / 2;
+  poly(out, [[x0, y0, z0], [x1, y0, z0], [x1, y0, z1], [x0, y0, z1]]);
+  poly(out, [[x0, y1, z0], [x1, y1, z0], [x1, y1, z1], [x0, y1, z1]]);
+  for (const [px, pz] of [[x0, z0], [x1, z0], [x1, z1], [x0, z1]]) seg(out, [px, y0, pz], [px, y1, pz]);
+  solidFace([x0, y0, z0], [x1, y0, z0], [x1, y0, z1], [x0, y0, z1]);
+  solidFace([x0, y1, z0], [x1, y1, z0], [x1, y1, z1], [x0, y1, z1]);
+  solidFace([x0, y0, z0], [x1, y0, z0], [x1, y1, z0], [x0, y1, z0]);
+  solidFace([x0, y0, z1], [x1, y0, z1], [x1, y1, z1], [x0, y1, z1]);
+  solidFace([x0, y0, z0], [x0, y0, z1], [x0, y1, z1], [x0, y1, z0]);
+  solidFace([x1, y0, z0], [x1, y0, z1], [x1, y1, z1], [x1, y1, z0]);
+}
+function ring(out, cx, y, cz, r, n = 64) { const pts = []; for (let i = 0; i < n; i++) pts.push([cx + Math.cos(i / n * TAU) * r, y, cz + Math.sin(i / n * TAU) * r]); poly(out, pts); }
+// Slanted hatching across a four-sided face (a-b along the top, d-c along the bottom)
+function hatchQuad(out, a, b, c, d, n, slant = 0.22) {
+  for (let i = 0; i <= n; i++) { const t = i / n; seg(out, lerp3(a, b, Math.max(0, t - slant)), lerp3(d, c, Math.min(1, t))); }
+}
+// Ordered dither on the ground plane: denser where fn(x, z) is darker
+function ditherGround(out, x0, x1, z0, z1, step, fn) {
+  let j = 0;
+  for (let z = z0; z <= z1; z += step, j++) {
+    let i = 0;
+    for (let x = x0; x <= x1; x += step, i++) {
+      const lv = fn(x, z);
+      if (lv > 0 && (BAYER[(j % 4) * 4 + (i % 4)] + 0.5) / 16 < lv) out.push(x, 0.002, z);
+    }
+  }
+}
+function wire(flat, opacity = 0.85) {
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.Float32BufferAttribute(flat, 3));
+  const m = new THREE.LineSegments(g, new THREE.LineBasicMaterial({ color: INK, transparent: true, opacity }));
+  m.frustumCulled = false;
+  return m;
+}
+function dots(flat, size = 2, opacity = 0.5) {
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.Float32BufferAttribute(flat, 3));
+  const m = new THREE.Points(g, new THREE.PointsMaterial({ color: INK, size, sizeAttenuation: false, transparent: true, opacity, depthWrite: false }));
+  m.frustumCulled = false;
+  return m;
+}
+function reveal(obj, f) {
+  const n = obj.geometry.attributes.position.count, step = obj.isLineSegments ? 2 : 1;
+  obj.geometry.setDrawRange(0, Math.floor(n * clamp(f, 0, 1) / step) * step);
+}
+function base(camPos, look, fov = 32) {
+  const scene = new THREE.Scene(), camera = new THREE.PerspectiveCamera(fov, 1.4, 0.1, 80);
+  camera.position.set(...camPos);
+  camera.lookAt(...look);
+  const tilt = new THREE.Group(), root = new THREE.Group();
+  tilt.add(root);
+  scene.add(tilt);
+  return { scene, camera, tilt, root, home: new THREE.Vector3(...camPos), look: new THREE.Vector3(...look) };
+}
+// A short, blocky figure drawn like the scenes around it: a box for the body, a cube for the head, short legs and arms.
+// It stands at x, z facing `face`, h times its base height of 0.28. stride swings the legs (-1 to 1);
+// lift raises the right hand to talk, point, write or hammer (0 to 1). Returns that hand.
+function person(out, x, z, face, h = 1, stride = 0, lift = 0) {
+  const fx = Math.cos(face), fz = Math.sin(face);
+  const at = (f, p, y) => [x + (fx * f - fz * p) * h, y * h, z + (fz * f + fx * p) * h];
+  const block = (f, p, y0, y1) => {
+    const c = [at(-f, -p, y0), at(f, -p, y0), at(f, p, y0), at(-f, p, y0)], d = [at(-f, -p, y1), at(f, -p, y1), at(f, p, y1), at(-f, p, y1)];
+    for (let i = 0; i < 4; i++) { seg(out, c[i], c[(i + 1) % 4]); seg(out, d[i], d[(i + 1) % 4]); seg(out, c[i], d[i]); }
+    solidFace(...c);
+    solidFace(...d);
+    for (let i = 0; i < 4; i++) solidFace(c[i], c[(i + 1) % 4], d[(i + 1) % 4], d[i]);
+  };
+  seg(out, at(0, -0.022, 0.09), at(0.05 * stride, -0.024, 0));
+  seg(out, at(0, 0.022, 0.09), at(-0.05 * stride, 0.024, 0));
+  block(0.025, 0.04, 0.09, 0.2);
+  block(0.032, 0.032, 0.215, 0.279);
+  seg(out, at(0, -0.04, 0.19), at(0.015 - 0.025 * stride, -0.055, 0.11));
+  const hand = at(0.015 + 0.025 * stride + 0.06 * lift, 0.055, 0.11 + 0.12 * lift);
+  seg(out, at(0, 0.04, 0.19), hand);
+  return hand;
+}
+// A tree: a trunk under three stacked cones
+function tree(out, x, z, h) {
+  seg(out, [x, 0, z], [x, 0.35 * h, z]);
+  const apex = [x, 1.25 * h, z];
+  for (const [y, r] of [[0.35, 0.36], [0.62, 0.28], [0.9, 0.18]]) {
+    const pts = [];
+    for (let i = 0; i < 10; i++) { const a = i / 10 * TAU; pts.push([x + Math.cos(a) * r * h, y * h, z + Math.sin(a) * r * h]); }
+    poly(out, pts);
+    for (let i = 0; i < 10; i += 2) seg(out, pts[i], apex);
+    solidFace(apex, ...pts, pts[0]);
+  }
+}
+// 0 → 1 → 0 across a and b seconds, easing in and out over 0.3s: for things that pop in, hold, and pop out
+const pop = (u, a, b) => ease(clamp(Math.min((u - a) / 0.3, (b - u) / 0.3), 0, 1));
+// The horizontal direction that faces the camera, in the coordinates of a scene root turned by R
+function across(s, R) {
+  const x = s.home.z - s.look.z, z = s.look.x - s.home.x, l = Math.hypot(x, z);
+  return [(x * Math.cos(R) - z * Math.sin(R)) / l, 0, (x * Math.sin(R) + z * Math.cos(R)) / l];
+}
+// A speech bubble k of full size, turned along ux to face the camera, its tail pointing down-left toward the speaker.
+// Holds a question mark, or a few lines of words.
+function bubble(out, c, ux, k, lines = 0) {
+  if (k <= 0.01) return;
+  const P = (u, v) => [c[0] + ux[0] * u * k, c[1] + v * k, c[2] + ux[2] * u * k];
+  const w = 0.17, h = 0.1, r = 0.035;
+  const edge = [P(-w + r, h), P(w - r, h), P(w, h - r), P(w, -h + r), P(w - r, -h), P(-0.02, -h), P(-0.06, -h - 0.07), P(-0.075, -h), P(-w + r, -h), P(-w, -h + r), P(-w, h - r)];
+  poly(out, edge);
+  solidFace(P(0, 0), ...edge, edge[0]);
+  if (!lines) {
+    const hook = [];
+    for (let i = 0; i <= 8; i++) { const a = Math.PI * (0.9 - i / 8 * 1.4); hook.push(P(Math.cos(a) * 0.03, 0.03 + Math.sin(a) * 0.03)); }
+    poly(out, hook, false);
+    seg(out, hook[8], P(0, -0.025));
+    seg(out, P(0, -0.05), P(0, -0.062));
+    return;
+  }
+  for (let i = 0; i < lines; i++) { const y = 0.045 - i * 0.045; seg(out, P(-w + 0.045, y), P(w - 0.045 - (i === lines - 1 ? 0.09 : (i % 2) * 0.03), y)); }
+}
+function setPositions(obj, flat) {
+  const attr = obj.geometry.attributes.position;
+  if (attr.array.length !== flat.length) obj.geometry.setAttribute('position', new THREE.Float32BufferAttribute(flat, 3));
+  else { attr.array.set(flat); attr.needsUpdate = true; }
+}
+
+// Human Restoration Project: empathy interviews. In each circle an adult asks, a student answers, and the adult writes it down.
+function interviews() {
+  const s = base([0, 2.2, 5.0], [0.1, 0.45, 0.1]);
+  const groups = [[-1.2, -0.4, 0.45], [1.15, -0.6, 2.7], [0.0, 0.8, -1.65]].map(([x, z, a], i) => ({
+    x, z, a, off: i * 2.4,
+    cx: x + Math.cos(a) * 0.3, cz: z + Math.sin(a) * 0.3,
+    kids: [-0.8, -0.27, 0.27, 0.8].map(d => ({ x: x + Math.cos(a + d) * 0.6, z: z + Math.sin(a + d) * 0.6, face: a + d + Math.PI })),
+  }));
+  const groundPts = [];
+  ditherGround(groundPts, -2.8, 2.8, -2.2, 2.2, 0.09, (x, z) => Math.max(0, ...groups.map(g => 0.42 * (1 - Math.hypot(x - g.cx, z - g.cz) / 0.9))));
+  const rings = [];
+  groups.forEach(g => ring(rings, g.cx, 0, g.cz, 0.9, 64));
+  const ground = dots(groundPts, 2, 0), ringObj = wire(rings, 0.3), people = wire([], 0.9), talk = wire([], 0.8), notes = dots([], 3, 0.9), skin = faces();
+  s.root.add(ground, ringObj, people, talk, notes, skin);
+  return {
+    ...s,
+    extent: [-1.6, 1.55, 0, 0.75, -1.05, 1.15],
+    update(t, built, phase) {
+      ground.material.opacity = 0.5 * smooth(0.05, 0.5, built);
+      reveal(ringObj, built * 1.5);
+      const R = -0.15 + 0.12 * Math.sin(t * 0.12);
+      s.root.rotation.y = R;
+      const ux = across(s, R), fig = [], words = [], pts = [];
+      FACES.out = [];
+      groups.forEach((g, i) => {
+        // Scrolling brings the circles in one at a time
+        const seen = i === 0 ? 1 : smooth(i * 0.25 - 0.06, i * 0.25, phase);
+        const k = ease(clamp(built * 1.7 - 0.3 - i * 0.2, 0, 1)) * seen;
+        if (k <= 0) return;
+        const u = (t + g.off) % 7, who = Math.floor((t + g.off) / 7) % g.kids.length;
+        const asking = pop(u, 0.2, 2.2), answering = pop(u, 2.5, 6.6);
+        const H = 1.6 * k, fx = Math.cos(g.a), fz = Math.sin(g.a);
+        person(fig, g.x, g.z, g.a, H, 0, asking > 0 ? 0.3 + 0.4 * asking : 0.42 + (answering > 0 ? 0.1 * Math.sin(t * 9) : 0));
+        // A clipboard held at the chest, with a few lines of notes
+        const cb = (p, v) => [g.x + (fx * (0.06 + v * 0.4) - fz * p) * H, (0.15 + v) * H, g.z + (fz * (0.06 + v * 0.4) + fx * p) * H];
+        poly(fig, [cb(-0.035, 0.04), cb(0.035, 0.04), cb(0.035, -0.04), cb(-0.035, -0.04)]);
+        solidFace(cb(-0.035, 0.04), cb(0.035, 0.04), cb(0.035, -0.04), cb(-0.035, -0.04));
+        for (let l = 0; l < 3; l++) seg(fig, cb(-0.022, 0.02 - l * 0.018), cb(0.022 - (l % 2) * 0.012, 0.02 - l * 0.018));
+        g.kids.forEach((kid, j) => person(fig, kid.x, kid.z, kid.face, 1.2 * k, 0, j === who ? answering * (0.35 + 0.25 * Math.sin(t * 5 + j)) : 0));
+        const above = (x, z, h) => [x + ux[0] * 0.07, 0.28 * h + 0.2, z + ux[2] * 0.07];
+        bubble(words, above(g.x, g.z, 1.6), ux, asking);
+        const kid = g.kids[who];
+        bubble(words, above(kid.x, kid.z, 1.2), ux, answering, 3);
+      });
+      // What they heard: notes rise from every clipboard to one page above the circles, which fills line by line
+      const gather = smooth(0.7, 0.8, phase);
+      if (gather > 0) {
+        const c = [0.0, 1.15, -0.5], P = (a, b) => [c[0] + ux[0] * a, c[1] + b, c[2] + ux[2] * a];
+        const w = 0.32 * gather, h = 0.22 * gather;
+        poly(words, [P(-w, h), P(w - 0.07, h), P(w, h - 0.07), P(w, -h), P(-w, -h)]);
+        solidFace(P(-w, h), P(w - 0.07, h), P(w, h - 0.07), P(w, -h), P(-w, -h));
+        seg(words, P(w - 0.07, h), P(w - 0.07, h - 0.07));
+        seg(words, P(w - 0.07, h - 0.07), P(w, h - 0.07));
+        const filled = Math.floor(clamp((phase - 0.76) / 0.18, 0, 1) * 6);
+        for (let l = 0; l < filled; l++) { const y = h - 0.07 - l * 0.06; seg(words, P(-w + 0.06, y), P(w - 0.06 - (l % 3) * 0.07, y)); }
+        groups.forEach((g, i) => {
+          for (let j = 0; j < 3; j++) {
+            const f = (t * 0.45 + j / 3 + i * 0.17) % 1, from = [g.x, 0.3, g.z], q = lerp3(from, c, ease(f));
+            q[1] += Math.sin(Math.PI * f) * 0.25;
+            pts.push(...q);
+          }
+        });
+      }
+      setPositions(people, fig);
+      setPositions(talk, words);
+      setPositions(notes, pts);
+      setPositions(skin, FACES.out);
+      FACES.out = null;
+      talk.material.opacity = 0.85 * smooth(0.8, 1, built);
+    },
+  };
+}
+
+// Pathways: career conversations that lead somewhere. Students talk through what they love and what they are good at,
+// Polaris matches each to careers and groups them by career cluster, their answers rise into a Career Constellation,
+// and each cluster opens a CTE pathway: a path to the program and local employer it leads to, which the students walk.
+function pathways() {
+  const s = base([0, 2.3, 10.2], [0.2, 1.15, -0.3]);
+  const rnd = seeded(31);
+  const shapes = [
+    [[-0.32, 0.12], [-0.12, 0.34], [0.14, 0.26], [0.32, 0.02], [0.08, -0.16]],
+    [[-0.34, -0.12], [-0.16, 0.18], [0.08, 0.06], [0.3, 0.3], [0.26, -0.22]],
+    [[-0.26, 0.3], [0, 0.08], [0.26, 0.3], [0.02, -0.22], [-0.3, -0.24]],
+    [[-0.3, -0.02], [-0.1, 0.24], [0.16, 0.18], [0.34, -0.06], [0.04, -0.22]],
+  ];
+  const EDGES = [[0, 1], [1, 2], [2, 3], [3, 4], [2, 4]];
+  const groups = [[-1.7, -0.05, 2.35], [-0.6, 0.7, 2.8], [0.6, -0.15, 2.45], [1.7, 0.6, 2.85]];
+  // Where each cluster leads, along the back: a clinic (Health Science), a house going up (Architecture & Construction),
+  // a factory (Manufacturing) and an office of screens (Information Technology)
+  const BZ = -1.5, sites = groups.map(([gx]) => gx * 1.15);
+  const siteSkins = [];
+  const siteObjs = sites.map((cx, g) => {
+    FACES.out = [];
+    const o = [], fz = BZ + 0.18;
+    if (g === 0) {
+      boxEdges(o, cx, 0, BZ, 0.62, 0.42, 0.36);
+      seg(o, [cx - 0.07, 0.27, fz], [cx + 0.07, 0.27, fz]);
+      seg(o, [cx, 0.2, fz], [cx, 0.34, fz]);
+      poly(o, [[cx - 0.06, 0, fz], [cx - 0.06, 0.13, fz], [cx + 0.06, 0.13, fz], [cx + 0.06, 0, fz]], false);
+    } else if (g === 1) {
+      poly(o, [[cx - 0.28, 0, BZ - 0.18], [cx + 0.28, 0, BZ - 0.18], [cx + 0.28, 0, BZ + 0.18], [cx - 0.28, 0, BZ + 0.18]]);
+      for (const z of [BZ - 0.18, BZ + 0.18]) {
+        for (let i = 0; i <= 4; i++) seg(o, [cx - 0.28 + i * 0.14, 0, z], [cx - 0.28 + i * 0.14, 0.32, z]);
+        seg(o, [cx - 0.28, 0.32, z], [cx + 0.28, 0.32, z]);
+      }
+      for (const x of [cx - 0.28, cx + 0.28]) { seg(o, [x, 0.32, BZ - 0.18], [x, 0.32, BZ + 0.18]); seg(o, [x, 0.32, BZ - 0.18], [x, 0.54, BZ]); seg(o, [x, 0.32, BZ + 0.18], [x, 0.54, BZ]); }
+      seg(o, [cx - 0.28, 0.54, BZ], [cx + 0.28, 0.54, BZ]);
+      for (const x of [cx - 0.09, cx + 0.09]) seg(o, [x, 0.32, BZ + 0.18], [x, 0.54, BZ]);
+    } else if (g === 2) {
+      boxEdges(o, cx, 0, BZ, 0.66, 0.3, 0.38);
+      for (let k = 0; k < 3; k++) {
+        const x0 = cx - 0.33 + k * 0.22;
+        for (const z of [BZ - 0.19, BZ + 0.19]) { seg(o, [x0, 0.3, z], [x0, 0.46, z]); seg(o, [x0, 0.46, z], [x0 + 0.22, 0.3, z]); }
+        seg(o, [x0, 0.46, BZ - 0.19], [x0, 0.46, BZ + 0.19]);
+        const zb = BZ - 0.19, zf = BZ + 0.19;
+        solidFace([x0, 0.3, zf], [x0, 0.46, zf], [x0 + 0.22, 0.3, zf]);
+        solidFace([x0, 0.3, zb], [x0, 0.46, zb], [x0 + 0.22, 0.3, zb]);
+        solidFace([x0, 0.46, zb], [x0, 0.46, zf], [x0 + 0.22, 0.3, zf], [x0 + 0.22, 0.3, zb]);
+        solidFace([x0, 0.3, zb], [x0, 0.3, zf], [x0, 0.46, zf], [x0, 0.46, zb]);
+      }
+      boxEdges(o, cx + 0.22, 0.3, BZ - 0.08, 0.07, 0.36, 0.07);
+      poly(o, [[cx - 0.07, 0, fz + 0.01], [cx - 0.07, 0.16, fz + 0.01], [cx + 0.07, 0.16, fz + 0.01], [cx + 0.07, 0, fz + 0.01]], false);
+    } else {
+      boxEdges(o, cx, 0, BZ, 0.5, 0.56, 0.36);
+      for (let r = 0; r < 3; r++) for (let c = 0; c < 3; c++) {
+        const x = cx - 0.15 + c * 0.15, y = 0.42 - r * 0.13;
+        poly(o, [[x - 0.045, y + 0.035, fz + 0.01], [x + 0.045, y + 0.035, fz + 0.01], [x + 0.045, y - 0.035, fz + 0.01], [x - 0.045, y - 0.035, fz + 0.01]]);
+      }
+      seg(o, [cx, 0.56, BZ], [cx, 0.76, BZ]);
+      seg(o, [cx - 0.05, 0.7, BZ], [cx + 0.05, 0.7, BZ]);
+    }
+    siteSkins.push(faces(FACES.out));
+    FACES.out = null;
+    return wire(o, 0.85);
+  });
+  const kids = [];
+  groups.forEach(([gx, gz, sy], g) => shapes[g].forEach(([px, py], j) => {
+    const a = j / 5 * TAU + g;
+    kids.push({
+      g, j,
+      home: [gx + Math.cos(a) * 0.34, gz + Math.sin(a) * 0.34],
+      star: [gx + px * 1.6, sy + py * 1.6, gz * 0.4 - 0.6],
+      roam: [(rnd() * 2 - 1) * 2.3, (rnd() * 2 - 1) * 1.1 + 0.3],
+      work: [sites[g] + (j - 2) * 0.12, BZ + 0.34 + (j % 2) * 0.1],
+      ph: rnd() * TAU,
+      delay: rnd() * 1.2,
+    });
+  }));
+  const groundPts = [];
+  ditherGround(groundPts, -2.8, 2.8, -1.9, 1.8, 0.1, (x, z) => 0.22 * (1 - Math.hypot(x / 2.8, (z - 0.1) / 1.9)));
+  const rings = [];
+  groups.forEach(([gx, gz]) => ring(rings, gx, 0, gz, 0.5, 40));
+  const sky = [];
+  for (let i = 0; i < 70; i++) sky.push((rnd() * 2 - 1) * 3.4, 1.6 + rnd() * 2, -1.6);
+  const ground = dots(groundPts, 2, 0), ringObj = wire(rings, 0.22), field = dots(sky, 2, 0);
+  const people = wire([], 0.9), threads = wire([], 0.25), lines = wire([], 0.7), stars = dots([], 4, 0.9), talk = wire([], 0.8), roads = wire([], 0.45), skin = faces();
+  s.root.add(ground, ringObj, field, ...siteObjs, ...siteSkins, people, threads, lines, stars, talk, roads, skin);
+  return {
+    ...s,
+    extent: [-2.4, 2.4, 0, 3.4, -1.7, 1.3],
+    update(t, built, phase) {
+      ground.material.opacity = 0.45 * smooth(0.05, 0.5, built);
+      reveal(ringObj, built * 1.4);
+      field.material.opacity = 0.35 * smooth(0.5, 1, built);
+      const R = 0.12 * Math.sin(t * 0.1);
+      s.root.rotation.y = R;
+      // Played by scrolling, from the first conversation to the students at work
+      const u = phase * 17.6, lit = smooth(0.7, 1, built);
+      const ux = across(s, R), fig = [], thread = [], line = [], pts = [], words = [], road = [];
+      FACES.out = [];
+      kids.forEach(kid => {
+        const k = ease(clamp(built * 1.6 - kid.delay * 0.3, 0, 1));
+        const go = smooth(3 + kid.delay, 6.5 + kid.delay, u), walk = ease(smooth(14 + kid.delay * 0.5, 16.6 + kid.delay * 0.5, u));
+        const a1 = t * 0.3 + kid.ph, a2 = t * 0.27 + kid.ph;
+        const rx = kid.roam[0] + 0.25 * Math.sin(a1), rz = kid.roam[1] + 0.2 * Math.cos(a2);
+        const hx = rx + (kid.home[0] - rx) * go, hz = rz + (kid.home[1] - rz) * go;
+        const x = hx + (kid.work[0] - hx) * walk, z = hz + (kid.work[1] - hz) * walk;
+        const [gx, gz] = groups[kid.g];
+        const face = walk > 0.97 ? -Math.PI / 2
+          : walk > 0.03 ? Math.atan2(kid.work[1] - hz, kid.work[0] - hx)
+          : go > 0.97 ? Math.atan2(gz - z, gx - x)
+          : go < 0.03 ? Math.atan2(-0.054 * Math.sin(a2), 0.075 * Math.cos(a1))
+          : Math.atan2(kid.home[1] - rz, kid.home[0] - rx);
+        const moving = Math.max(Math.min(1, 6 * go * (1 - go) + 0.5 * (1 - go)), walk > 0.02 && walk < 0.98 ? 1 : 0);
+        if (k > 0) person(fig, x, z, face, 1.1 * k, Math.sin(t * 7 + kid.ph) * moving);
+        // The conversation: one student in each future group says what they love
+        if (kid.j === 0) bubble(words, [x + ux[0] * 0.07, 0.28 * 1.1 + 0.2, z + ux[2] * 0.07], ux, pop(u, 0.4 + kid.g * 0.5, 3 + kid.g * 0.5) * smooth(0.8, 1, built), 2);
+        const rise = ease(smooth(6.4 + kid.delay, 8.4 + kid.delay, u)) * lit;
+        if (rise <= 0) return;
+        const head = [hx, 0.31, hz], p = lerp3(head, kid.star, rise);
+        pts.push(...p);
+        if (u < 11) for (let i = 0; i < 14; i += 2) seg(thread, lerp3(head, p, i / 14), lerp3(head, p, (i + 1) / 14));
+        if (rise > 0.98) {
+          const r = 0.05 + 0.015 * Math.sin(t * 3 + kid.ph);
+          seg(line, [p[0] - r, p[1], p[2]], [p[0] + r, p[1], p[2]]);
+          seg(line, [p[0], p[1] - r, p[2]], [p[0], p[1] + r, p[2]]);
+        }
+      });
+      threads.material.opacity = 0.25 * (1 - smooth(9.6, 11, u));
+      groups.forEach(([gx, gz], g) => {
+        const join = smooth(9.7 + g * 0.3, 11.2 + g * 0.3, u) * lit;
+        EDGES.forEach(([a, b], e) => {
+          const f = clamp(join * EDGES.length - e, 0, 1);
+          if (f > 0) seg(line, kids[g * 5 + a].star, lerp3(kids[g * 5 + a].star, kids[g * 5 + b].star, f));
+        });
+        // The pathway: the program and employer draw in at the back, then a dashed path runs to it from the group
+        const drawn = (u - 11.4 - g * 0.35) / 1.3 * smooth(0.5, 1, built);
+        reveal(siteObjs[g], drawn);
+        siteSkins[g].visible = drawn >= 1;
+        const draw = smooth(12.4 + g * 0.25, 13.8 + g * 0.25, u);
+        const A = [gx, 0.004, gz - 0.5], B = [sites[g], 0.004, BZ + 0.24];
+        for (let i = 0; i < 18; i += 2) {
+          if (i / 18 >= draw) break;
+          seg(road, lerp3(A, B, i / 18), lerp3(A, B, Math.min(draw, (i + 1) / 18)));
+        }
+      });
+      setPositions(people, fig);
+      setPositions(threads, thread);
+      setPositions(lines, line);
+      setPositions(stars, pts);
+      setPositions(talk, words);
+      setPositions(roads, road);
+      setPositions(skin, FACES.out);
+      FACES.out = null;
+    },
+  };
+}
+
+// Build: people say what a new space should feel like, Polaris finds the themes they share,
+// and the themes become a room you can walk through. Three beats, played by scrolling.
+function build() {
+  const s = base([3.6, 3.1, 5.0], [0, 0.35, 0]);
+  const X0 = -1.5, X1 = 1.5, Z0 = -1.1, Z1 = 1.1;
+  const floor = [];
+  for (let i = 0; i <= 12; i++) { const x = X0 + (X1 - X0) * i / 12; seg(floor, [x, 0, Z0], [x, 0, Z1]); }
+  for (let j = 0; j <= 9; j++) { const z = Z0 + (Z1 - Z0) * j / 9; seg(floor, [X0, 0, z], [X1, 0, z]); }
+  const voices = [[-1.15, 0.85], [-0.25, 0.95], [0.7, 0.9], [1.25, 0.25], [1.15, -0.65]];
+  // Belonging, Making, Gathering, Quiet, Daylight, sized by how many voices raised each
+  const themes = [[-0.55, -0.35, 38], [0.45, -0.5, 27], [-0.15, 0.35, 21], [0.85, 0.3, 16], [-1.05, 0.3, 12]].map(([x, z, v]) => ({ x, z, v, r: 0.1 * Math.sqrt(v / 4) }));
+  const links = [[0, 1], [0, 2], [1, 3], [2, 3], [2, 4], [0, 4]];
+  // The room's furniture, drawn in order as the model arrives, solid once it is all there
+  const room = [];
+  FACES.out = [];
+  for (let c = 0; c < 3; c++) for (let r = 0; r < 2; r++) boxEdges(room, -0.95 + c * 0.26, r * 0.27, -0.97, 0.26, 0.27, 0.26);
+  ring(room, 0.25, 0.36, 0.15, 0.32, 40);
+  ring(room, 0.25, 0.01, 0.15, 0.14, 24);
+  seg(room, [0.25, 0, 0.15], [0.25, 0.36, 0.15]);
+  for (let k = 0; k < 4; k++) {
+    const a = Math.PI / 4 + k * Math.PI / 2, dx = Math.cos(a), dz = Math.sin(a), cx = 0.25 + dx * 0.5, cz = 0.15 + dz * 0.5;
+    boxEdges(room, cx, 0, cz, 0.16, 0.2, 0.16);
+    for (const side of [-1, 1]) seg(room, [cx + dx * 0.08 - dz * 0.08 * side, 0.2, cz + dz * 0.08 + dx * 0.08 * side], [cx + dx * 0.08 - dz * 0.08 * side, 0.4, cz + dz * 0.08 + dx * 0.08 * side]);
+    seg(room, [cx + dx * 0.08 + dz * 0.08, 0.4, cz + dz * 0.08 - dx * 0.08], [cx + dx * 0.08 - dz * 0.08, 0.4, cz + dz * 0.08 + dx * 0.08]);
+  }
+  poly(room, [[1.15, 0, -0.9], [1.15, 0.8, -0.9], [1.15, 0.8, -0.1], [1.15, 0, -0.1]]);
+  seg(room, [1.15, 0, -0.5], [1.15, 0.8, -0.5]);
+  seg(room, [1.15, 0.3, -0.8], [1.15, 0.5, -0.6]);
+  seg(room, [1.15, 0.35, -0.4], [1.15, 0.5, -0.25]);
+  boxEdges(room, 0.55, 0, -0.95, 0.5, 0.6, 0.28);
+  seg(room, [0.55, 0, -0.81], [0.55, 0.6, -0.81]);
+  seg(room, [0.5, 0.28, -0.81], [0.5, 0.36, -0.81]);
+  seg(room, [0.6, 0.28, -0.81], [0.6, 0.36, -0.81]);
+  ring(room, -1.25, 0, 0.8, 0.1, 16);
+  ring(room, -1.25, 0.18, 0.8, 0.13, 16);
+  for (let k = 0; k < 4; k++) { const a = k / 4 * TAU; seg(room, [-1.25 + Math.cos(a) * 0.1, 0, 0.8 + Math.sin(a) * 0.1], [-1.25 + Math.cos(a) * 0.13, 0.18, 0.8 + Math.sin(a) * 0.13]); }
+  for (let k = 0; k < 6; k++) {
+    const a = k / 6 * TAU, stem = [-1.25, 0.18, 0.8], tip = [-1.25 + Math.cos(a) * 0.28, 0.5 + 0.08 * (k % 2), 0.8 + Math.sin(a) * 0.28];
+    const bend = lerp3(stem, tip, 0.5);
+    bend[1] += 0.12;
+    seg(room, stem, bend);
+    seg(room, bend, tip);
+  }
+  const roomSkin = faces(FACES.out);
+  FACES.out = null;
+  const floorObj = wire(floor, 0.22), roomObj = wire(room, 0.85), work = wire([], 0.9), talk = wire([], 0.8), flying = dots([], 3, 0.9), skin = faces();
+  s.root.add(floorObj, roomObj, roomSkin, work, talk, flying, skin);
+  return {
+    ...s,
+    extent: [-1.5, 1.5, 0, 0.95, -1.1, 1.1],
+    update(t, built, phase) {
+      reveal(floorObj, built * 1.5);
+      // Played by scrolling, from the first voice to the visitors walking the room
+      const u = phase * 17.2, R = 0.08 * Math.sin(t * 0.15);
+      s.root.rotation.y = R;
+      const ux = across(s, R), out = [], words = [], pts = [], grown = ease(clamp(built * 1.5, 0, 1));
+      FACES.out = [];
+      // Say what matters: each person speaks in turn
+      const stay = 1 - smooth(11.4, 12.2, u);
+      voices.forEach(([x, z], i) => {
+        if (stay * grown > 0.01) person(out, x, z, Math.atan2(-z, -x), 1.2 * stay * grown, 0, pop(u, 0.4 + i * 0.9, 2.8 + i * 0.9) * 0.5);
+        bubble(words, [x + ux[0] * 0.07, 0.54, z + ux[2] * 0.07], ux, pop(u, 0.4 + i * 0.9, 2.8 + i * 0.9) * smooth(0.8, 1, built), 2);
+      });
+      // Find the themes: the voices fly down into rings sized by how many raised each one
+      const fade = 1 - smooth(12, 13, u);
+      themes.forEach((th, i) => {
+        const grow = smooth(6.2 + i * 0.3, 7.4 + i * 0.3, u) * fade;
+        if (grow > 0) ring(out, th.x, 0.005, th.z, th.r * grow, 40);
+        for (let j = 0; j < Math.round(th.v / 6); j++) {
+          const f = ease(clamp((u - 6 - j * 0.18) / 1.3, 0, 1));
+          if (f <= 0 || f >= 1) continue;
+          const [vx, vz] = voices[(i + j) % voices.length], p = lerp3([vx, 0.54, vz], [th.x, 0.01, th.z], f);
+          p[1] += Math.sin(Math.PI * f) * 0.35;
+          pts.push(...p);
+        }
+      });
+      const tie = smooth(8.2, 9.6, u) * fade;
+      links.forEach(([a, b], e) => {
+        const f = clamp(tie * links.length - e, 0, 1);
+        if (f > 0) seg(out, [themes[a].x, 0.005, themes[a].z], lerp3([themes[a].x, 0.005, themes[a].z], [themes[b].x, 0.005, themes[b].z], f));
+      });
+      // Walk the model: walls rise, the furniture draws in, and two visitors walk through
+      const rise = smooth(12, 13, u) * (1 - smooth(17.3, 18, u));
+      if (rise > 0) {
+        const H = 0.95 * rise;
+        const back = [[X0, H, Z0], [X1, H, Z0], [X1, 0, Z0], [X0, 0, Z0]], side = [[X0, H, Z1], [X0, H, Z0], [X0, 0, Z0], [X0, 0, Z1]];
+        poly(out, back);
+        poly(out, side);
+        solidFace(...back);
+        solidFace(...side);
+        hatchQuad(out, ...back, 18);
+        hatchQuad(out, ...side, 14);
+      }
+      const furnish = smooth(12.6, 15, u) * (1 - smooth(17.3, 17.9, u));
+      reveal(roomObj, furnish * smooth(0.5, 1, built));
+      roomSkin.visible = furnish * smooth(0.5, 1, built) >= 1;
+      if (furnish > 0.95) {
+        // The work table everyone asked for, lifting off its highlighted floor cells
+        const y = 0.36 + 0.04 * (0.5 + 0.5 * Math.sin(t * 1.6));
+        boxEdges(out, -0.55, y - 0.03, 0.55, 0.7, 0.03, 0.4);
+        for (const [lx, lz] of [[-0.85, 0.38], [-0.25, 0.38], [-0.25, 0.72], [-0.85, 0.72]]) seg(out, [lx, 0, lz], [lx, y - 0.03, lz]);
+        hatchQuad(out, [-0.95, 0.003, 0.3], [-0.15, 0.003, 0.3], [-0.15, 0.003, 0.8], [-0.95, 0.003, 0.8], 10, 0.15);
+      }
+      if (rise > 0.5) {
+        const w = clamp((u - 13) / 4.2, 0, 1), there = ease(1 - Math.abs(2 * w - 1));
+        [[1.35, 0.92, -0.95, 0.95], [1.3, 0.55, 0.8, -0.4]].forEach(([ax, az, bx, bz], j) => {
+          const x = ax + (bx - ax) * there, z = az + (bz - az) * there;
+          const dir = w < 0.5 ? Math.atan2(bz - az, bx - ax) : Math.atan2(az - bz, ax - bx);
+          person(out, x, z, dir, 1.2 * rise, Math.sin(t * 7 + j * 2) * (w > 0 && w < 1 ? 1 : 0));
+          ring(out, x, 0.005, z, 0.12, 20);
+        });
+      }
+      setPositions(work, out);
+      setPositions(talk, words);
+      setPositions(flying, pts);
+      setPositions(skin, FACES.out);
+      FACES.out = null;
+    },
+  };
+}
+
+// Design Challenge: students build a bridge across the gap between two tables, talking it through,
+// photograph it, and see the skills it showed. Three beats, played by scrolling.
+function challenge() {
+  const s = base([0.5, 1.8, 4.7], [0.3, 0.4, 0]);
+  const T = 0.32;
+  const tables = [];
+  FACES.out = [];
+  for (const cx of [-1.15, 1.15]) {
+    boxEdges(tables, cx, T - 0.04, 0, 1.2, 0.04, 1.0);
+    for (const [lx, lz] of [[-0.52, -0.42], [0.52, -0.42], [0.52, 0.42], [-0.52, 0.42]]) seg(tables, [cx + lx, 0, lz], [cx + lx, T - 0.04, lz]);
+  }
+  const tableSkin = faces(FACES.out);
+  FACES.out = null;
+  // A truss in two planes: chords along the deck and the peaks, diagonals between, ties across
+  const deck = z => [-0.85, -0.425, 0, 0.425, 0.85].map(x => [x, T + 0.005, z]);
+  const peak = z => [-0.6375, -0.2125, 0.2125, 0.6375].map(x => [x, T + 0.3, z]);
+  const plane = z => {
+    const d = deck(z), p = peak(z), m = [];
+    for (let i = 0; i < 4; i++) {
+      m.push([d[i], d[i + 1]], [d[i], p[i]], [p[i], d[i + 1]]);
+      if (i < 3) m.push([p[i], p[i + 1]]);
+    }
+    return m;
+  };
+  const back = plane(-0.1), front = plane(0.1);
+  const ties = deck(-0.1).map((a, i) => [a, deck(0.1)[i]]);
+  // The last triangle of the front truss is the piece a student holds, then snaps in
+  const held = [front[13], front[14], front[12]];
+  const members = [...back, ...ties, ...front.slice(0, 12)];
+  const tableObj = wire(tables, 0.75), work = wire([], 0.9), talk = wire([], 0.8), nodes = dots([], 4, 0.9), skin = faces();
+  s.root.add(tableObj, tableSkin, work, talk, nodes, skin);
+  const kids = [[-0.9, 0.85, -1.2], [1.0, 0.8, -1.95]];
+  return {
+    ...s,
+    extent: [-1.8, 1.8, 0, 0.95, -0.5, 0.9],
+    update(t, built, phase) {
+      reveal(tableObj, built * 1.4);
+      tableSkin.visible = built * 1.4 >= 1;
+      // Played by scrolling, from the first piece to the skills
+      const u = phase * 16.9, R = 0.1 * Math.sin(t * 0.13);
+      s.root.rotation.y = R;
+      const ux = across(s, R), out = [], words = [], pts = [], grown = ease(clamp(built * 1.5, 0, 1));
+      FACES.out = [];
+      const clear = 1 - smooth(17.2, 17.9, u);
+      // Build and talk: pieces go in one at a time while the students think out loud
+      members.forEach(([a, b], m) => {
+        const k = smooth(0.3 + m * 0.15, 0.55 + m * 0.15, u) * clear * smooth(0.4, 1, built);
+        if (k <= 0) return;
+        seg(out, a, lerp3(a, b, k));
+        pts.push(...a);
+        if (k > 0.99) pts.push(...b);
+      });
+      const holding = smooth(5, 5.4, u) * clear, snap = smooth(6.4, 7, u);
+      if (holding > 0) {
+        const pivot = [0.64, T + 0.15, 0.1], tilt = 0.5 * (1 - snap), c = Math.cos(tilt), sn = Math.sin(tilt);
+        const move = p => {
+          const x = p[0] - pivot[0], y = p[1] - pivot[1];
+          return [pivot[0] + x * c - y * sn + 0.35 * (1 - snap), pivot[1] + x * sn + y * c + 0.28 * (1 - snap), p[2] + 0.45 * (1 - snap)];
+        };
+        held.forEach(([a, b]) => { const A = move(a), B = move(b); seg(out, A, B); pts.push(...A, ...B); });
+      }
+      kids.forEach(([x, z, face], j) => {
+        const lift = j === 1 ? 0.2 + 0.6 * holding * (1 - snap) : 0.3 + 0.2 * Math.sin(t * 2.4);
+        person(out, x, z, face, 1.35 * grown, 0, lift);
+      });
+      const above = ([x, z]) => [x + ux[0] * 0.07, 0.28 * 1.35 + 0.2, z + ux[2] * 0.07];
+      bubble(words, above(kids[0]), ux, pop(u, 1.5, 4.6) * smooth(0.8, 1, built), 2);
+      bubble(words, above(kids[1]), ux, pop(u, 4.8, 7.8) * smooth(0.8, 1, built), 2);
+      // Snap and check: a viewfinder frames the bridge, then a check mark
+      const frame = pop(u, 8, 12.5);
+      if (frame > 0) {
+        const c = [0, T + 0.16, 0], hw = 1.05 * (1.15 - 0.15 * frame), hh = 0.42 * (1.15 - 0.15 * frame), L = 0.18;
+        const P = (a, b) => [c[0] + ux[0] * a, c[1] + b, c[2] + ux[2] * a];
+        for (const [sx, sy] of [[-1, 1], [1, 1], [1, -1], [-1, -1]]) {
+          seg(out, P(sx * hw, sy * hh), P(sx * (hw - L), sy * hh));
+          seg(out, P(sx * hw, sy * hh), P(sx * hw, sy * (hh - L * 0.7)));
+        }
+        const tick = smooth(9.6, 10.4, u);
+        if (tick > 0) {
+          const a = P(hw + 0.12, hh - 0.05), b = P(hw + 0.18, hh - 0.11), d = P(hw + 0.32, hh + 0.05);
+          seg(out, a, lerp3(a, b, Math.min(1, tick * 2)));
+          if (tick > 0.5) seg(out, b, lerp3(b, d, tick * 2 - 1));
+        }
+      }
+      // See the skills: three bars rise on the far table
+      [0.55, 0.42, 0.32].forEach((h, i) => {
+        const g = smooth(12.3 + i * 0.3, 13.3 + i * 0.3, u) * (1 - smooth(17, 17.6, u));
+        if (g <= 0) return;
+        const x = 0.95 + i * 0.28, y = T + h * g, w = 0.09;
+        boxEdges(out, x, T, -0.2, 0.18, h * g, 0.18);
+        hatchQuad(out, [x - w, y, -0.29], [x + w, y, -0.29], [x + w, y, -0.11], [x - w, y, -0.11], 4);
+      });
+      setPositions(work, out);
+      setPositions(talk, words);
+      setPositions(nodes, pts);
+      setPositions(skin, FACES.out);
+      FACES.out = null;
+    },
+  };
+}
+
+// Third Coast Learning Collaborative: students out in the schoolyard doing projects, a garden, a frame going up, a chart, a kite
+function schoolyard() {
+  const s = base([0.4, 2.9, 8.0], [0.1, 0.55, -0.1]);
+  const rnd = seeded(11);
+  // The school at the back, flying together from scattered pieces as it builds
+  const ox = 0.1, oz = -1.35, sc = 0.8, W = 1.1, D = 0.7, E = 1.1, R = 1.75;
+  const S = (x, y, z) => [ox + x * sc, y * sc, oz + z * sc];
+  const edges = [], detail = [];
+  FACES.out = [];
+  boxEdges(edges, ox, 0, oz, 2 * W * sc, E * sc, 2 * D * sc);
+  seg(edges, S(-W, R, 0), S(W, R, 0));
+  for (const sx of [-W, W]) { seg(edges, S(sx, E, D), S(sx, R, 0)); seg(edges, S(sx, E, -D), S(sx, R, 0)); }
+  boxEdges(edges, ox, (R - 0.05) * sc, oz, 0.36 * sc, 0.42 * sc, 0.36 * sc);
+  for (const [x, z] of [[-0.18, -0.18], [0.18, -0.18], [0.18, 0.18], [-0.18, 0.18]]) seg(edges, S(x, R + 0.37, z), S(0, R + 0.75, 0));
+  // Its roof, gables and spire are solid too, once it has flown together
+  solidFace(S(-W, E, D), S(W, E, D), S(W, R, 0), S(-W, R, 0));
+  solidFace(S(-W, E, -D), S(W, E, -D), S(W, R, 0), S(-W, R, 0));
+  for (const sx of [-W, W]) solidFace(S(sx, E, D), S(sx, E, -D), S(sx, R, 0));
+  const spire = [[-0.18, -0.18], [0.18, -0.18], [0.18, 0.18], [-0.18, 0.18]].map(([x, z]) => S(x, R + 0.37, z));
+  for (let i = 0; i < 4; i++) solidFace(spire[i], spire[(i + 1) % 4], S(0, R + 0.75, 0));
+  const schoolSkin = faces(FACES.out);
+  FACES.out = null;
+  poly(edges, [S(-0.17, 0, D), S(0.17, 0, D), S(0.17, 0.62, D), S(-0.17, 0.62, D)]);
+  for (const wx of [-0.82, -0.5, 0.5, 0.82]) {
+    const a = S(wx - 0.11, 0.82, D), b = S(wx + 0.11, 0.82, D), c = S(wx + 0.11, 0.46, D), d = S(wx - 0.11, 0.46, D);
+    poly(edges, [a, b, c, d]);
+    hatchQuad(detail, a, b, c, d, 6);
+  }
+  for (let i = 1; i < 16; i++) { const x = -W + 2 * W * i / 16; seg(detail, S(x, E, D), S(x, R, 0)); }
+  const n = edges.length / 6, offsets = [];
+  for (let i = 0; i < n; i++) { const a = rnd() * TAU, r = 1.6 + rnd() * 2.2; offsets.push(Math.cos(a) * r, 0.6 + rnd() * 2.2, Math.sin(a) * r); }
+  // The yard: a raised garden bed, an easel holding a chart, two trees
+  const yard = [];
+  FACES.out = [];
+  boxEdges(yard, -1.5, 0, 0.15, 0.95, 0.1, 0.32);
+  for (const z of [0.1, 0.2]) seg(yard, [-1.95, 0.1, z], [-1.05, 0.1, z]);
+  const ex = 0.1, bz = y => 0.598 - (y - 0.32) * 0.107;
+  for (const leg of [[ex - 0.13, 0, 0.62], [ex + 0.13, 0, 0.62], [ex, 0, 0.4]]) seg(yard, leg, [ex, 0.66, 0.55]);
+  poly(yard, [[ex - 0.18, 0.6, bz(0.6)], [ex + 0.18, 0.6, bz(0.6)], [ex + 0.18, 0.32, bz(0.32)], [ex - 0.18, 0.32, bz(0.32)]]);
+  for (const [bx, bh] of [[-0.1, 0.08], [0, 0.14], [0.1, 0.19]]) {
+    const y0 = 0.35, y1 = y0 + bh;
+    poly(yard, [[ex + bx - 0.03, y0, bz(y0) + 0.002], [ex + bx + 0.03, y0, bz(y0) + 0.002], [ex + bx + 0.03, y1, bz(y1) + 0.002], [ex + bx - 0.03, y1, bz(y1) + 0.002]]);
+  }
+  tree(yard, 2.2, -1.5, 1.1);
+  tree(yard, -2.05, -1.65, 1.2);
+  solidFace([ex - 0.18, 0.6, bz(0.6)], [ex + 0.18, 0.6, bz(0.6)], [ex + 0.18, 0.32, bz(0.32)], [ex - 0.18, 0.32, bz(0.32)]);
+  const yardSkin = faces(FACES.out);
+  FACES.out = null;
+  const groundPts = [];
+  ditherGround(groundPts, -3, 3, -2.2, 2.2, 0.09, (x, z) => { const r = Math.hypot(x / 2.9, (z - 0.2) / 1.9); return r > 1 ? 0 : 0.06 + 0.3 * (1 - r); });
+  // A small frame going up beside the yard, piece by piece
+  const fx0 = 1.55, fz0 = 0.05, F = (x, y, z) => [fx0 + x, y, fz0 + z];
+  const members = [];
+  for (const [x, z] of [[-0.3, -0.2], [0.3, -0.2], [0.3, 0.2], [-0.3, 0.2]]) members.push([F(x, 0, z), F(x, 0.45, z)]);
+  members.push([F(-0.3, 0.45, -0.2), F(0.3, 0.45, -0.2)], [F(-0.3, 0.45, 0.2), F(0.3, 0.45, 0.2)], [F(-0.3, 0.45, -0.2), F(-0.3, 0.45, 0.2)], [F(0.3, 0.45, -0.2), F(0.3, 0.45, 0.2)]);
+  for (const x of [-0.3, 0.3]) members.push([F(x, 0.45, 0.2), F(x, 0.68, 0)], [F(x, 0.45, -0.2), F(x, 0.68, 0)]);
+  members.push([F(-0.3, 0.68, 0), F(0.3, 0.68, 0)], [F(-0.3, 0, 0.2), F(0.3, 0.45, 0.2)]);
+  const toward = (x, z, tx, tz) => Math.atan2(tz - z, tx - x);
+  const kids = [
+    [-1.78, 0.62, -Math.PI / 2, t => 0.25 + 0.15 * Math.sin(t * 2.2)],
+    [-1.22, 0.64, -Math.PI / 2, t => 0.25 + 0.15 * Math.sin(t * 2.2 + 2)],
+    [1.15, 0.55, toward(1.15, 0.55, fx0, fz0), t => 0.35 + 0.45 * Math.abs(Math.sin(t * 5))],
+    [1.95, 0.5, toward(1.95, 0.5, fx0, fz0), t => 0.35 + 0.45 * Math.abs(Math.sin(t * 5 + 1.3))],
+    [0.44, 0.66, Math.PI * 0.62, t => 0.8 + 0.08 * Math.sin(t * 1.7)],
+    [-0.18, 1.32, -Math.PI / 2, () => 0],
+    [0.12, 1.4, -Math.PI / 2, () => 0],
+    [0.42, 1.32, -Math.PI / 2, () => 0],
+    [-0.95, 1.5, Math.PI * 1.1, () => 0.95],
+  ];
+  const house = wire(edges, 0.9), hatch = wire(detail, 0.6), yardObj = wire(yard, 0.8), ground = dots(groundPts, 2, 0), life = wire([], 0.9), skin = faces();
+  s.root.add(house, hatch, yardObj, ground, life, schoolSkin, yardSkin, skin);
+  const flown = new Float32Array(edges.length);
+  return {
+    ...s,
+    extent: [-2.6, 2.6, 0, 2.2, -1.9, 1.6],
+    update(t, built, phase) {
+      // Scrolling brings in the garden, the frame, the share-out and the kite in turn
+      const at = a => smooth(a - 0.06, a, phase);
+      const garden = at(0.22), framed = at(0.42), share = at(0.62), kite = at(0.82);
+      const gate = [garden, garden, framed, framed, share, share, share, share, kite];
+      for (let i = 0; i < n; i++) {
+        const k = ease(clamp(built * 1.6 - (i / n) * 0.6, 0, 1)), o = i * 6, m = 1 - k;
+        for (let j = 0; j < 6; j++) flown[o + j] = edges[o + j] + offsets[i * 3 + (j % 3)] * m;
+      }
+      setPositions(house, flown);
+      reveal(hatch, (built - 0.5) / 0.4);
+      ground.material.opacity = 0.5 * smooth(0.2, 0.8, built);
+      reveal(yardObj, (built - 0.35) / 0.45);
+      const out = [], grow = smooth(0.6, 1, built) * garden;
+      FACES.out = [];
+      // Sprouts in the garden bed, slowly growing and swaying
+      for (let i = 0; i < 7; i++) {
+        const x = -1.86 + i * 0.12, z = 0.15 + (i % 2 ? 0.06 : -0.06), h = (0.06 + 0.1 * (0.5 + 0.5 * Math.sin(t * 0.35 + i * 1.7))) * grow;
+        if (h < 0.01) continue;
+        const top = [x + 0.012 * Math.sin(t * 1.4 + i), 0.1 + h, z];
+        seg(out, [x, 0.1, z], top);
+        seg(out, [top[0], top[1] - 0.025, z], [top[0] - 0.035, top[1] + 0.005, z]);
+        seg(out, [top[0], top[1] - 0.025, z], [top[0] + 0.035, top[1] + 0.005, z]);
+      }
+      const up = Math.floor(members.length * Math.min(clamp((built - 0.5) / 0.45, 0, 1), clamp((phase - 0.38) / 0.18, 0, 1)));
+      const active = Math.floor(t / 1.4) % members.length;
+      members.forEach(([a, b], i) => {
+        if (i >= up) return;
+        const lift = built > 0.98 && up === members.length && !reduce && i === active ? 0.12 * Math.sin((t % 1.4) / 1.4 * Math.PI) : 0;
+        seg(out, [a[0], a[1] + lift, a[2]], [b[0], b[1] + lift, b[2]]);
+      });
+      let hand = null;
+      kids.forEach(([x, z, face, lift], j) => {
+        const k = ease(clamp((built - 0.55) / 0.35 - j * 0.04, 0, 1)) * gate[j];
+        if (k <= 0) return;
+        const h = person(out, x, z, face, 1.1 * k, 0, lift(t));
+        if (j === kids.length - 1) hand = h;
+      });
+      if (hand && built > 0.85 && kite > 0.6) {
+        // The kite, its tail waving, on a sagging string down to the student's hand
+        const kx = -2.05 + 0.12 * Math.sin(t * 0.8), ky = 2.0 + 0.1 * Math.sin(t * 1.25), kz = 0.55;
+        const top = [kx, ky + 0.16, kz], right = [kx + 0.11, ky + 0.02, kz], bottom = [kx, ky - 0.2, kz], left = [kx - 0.11, ky + 0.02, kz];
+        poly(out, [top, right, bottom, left]);
+        solidFace(top, right, bottom, left);
+        seg(out, top, bottom);
+        seg(out, left, right);
+        let prev = bottom;
+        for (let i = 1; i <= 6; i++) {
+          const p = [kx + 0.05 * Math.sin(t * 3 + i * 0.9), ky - 0.2 - i * 0.07, kz];
+          seg(out, prev, p);
+          seg(out, [p[0] - 0.02, p[1] + 0.012, kz], [p[0] + 0.02, p[1] - 0.012, kz]);
+          prev = p;
+        }
+        prev = hand;
+        for (let i = 1; i <= 16; i++) {
+          const p = lerp3(hand, [kx, ky - 0.02, kz], i / 16);
+          p[1] -= 0.3 * Math.sin(Math.PI * i / 16);
+          seg(out, prev, p);
+          prev = p;
+        }
+      }
+      setPositions(life, out);
+      setPositions(skin, FACES.out);
+      FACES.out = null;
+      schoolSkin.visible = built > 0.97;
+      yardSkin.visible = built > 0.8;
+      life.material.opacity = 0.9 * smooth(0.55, 0.9, built);
+      s.root.rotation.y = -0.2 + 0.12 * Math.sin(t * 0.1);
+    },
+  };
+}
+
+// Palisade: the two seats side by side, played from real footage traced into line art (media/, made from the Steam GIFs).
+// The Ambassador walks the rooms on the left; the Operator works the terminal on the right; a signal passes between them.
+// The footage is black lines on white; the screen shader turns white transparent and dithers the picture in as it builds.
+const SCREEN = {
+  vertexShader: 'varying vec2 vUv; void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
+  fragmentShader: `
+    uniform sampler2D map;
+    uniform float built;
+    varying vec2 vUv;
+    float bayer2(vec2 a) { a = floor(a); return fract(dot(a, vec2(0.5, a.y * 0.75))); }
+    float bayer4(vec2 a) { return bayer2(0.5 * a) * 0.25 + bayer2(a); }
+    void main() {
+      if (bayer4(gl_FragCoord.xy) >= built) discard;
+      float lum = dot(texture2D(map, vUv).rgb, vec3(0.299, 0.587, 0.114));
+      gl_FragColor = vec4(0.0, 0.0, 0.0, (1.0 - lum) * 0.9);
+    }`,
+};
+// The footage is line art on white, so a frame with nothing but black means this browser isn't giving us the picture
+const probe = document.createElement('canvas').getContext('2d', { willReadFrequently: true });
+function hasPicture(video) {
+  probe.drawImage(video, 0, 0, 8, 4);
+  return probe.getImageData(0, 0, 8, 4).data.some((value, i) => i % 4 !== 3 && value > 16);
+}
+function palisade() {
+  const s = base([0, 1.6, 8.4], [0.15, 1.05, 0]);
+  const screens = [['media/palisade-ambassador.mp4', -1.32, 0.26, 0.02], ['media/palisade-operator.mp4', 1.32, -0.26, -0.22]].map(([src, x, turn, z]) => {
+    const video = document.createElement('video');
+    Object.assign(video, { muted: true, loop: true, playsInline: true, preload: 'auto' });
+    // A still frame under reduced motion: the moment the answer lands
+    video.addEventListener('loadeddata', () => { view.picture = hasPicture(video); if (reduce) video.currentTime = video.duration * 0.9; document.dispatchEvent(new Event('progress')); });
+    // Each seek lands a new frame: hand it to the screen and draw
+    video.addEventListener('seeked', () => { view.picture = hasPicture(video); tex.needsUpdate = true; document.dispatchEvent(new Event('progress')); });
+    const tex = new THREE.VideoTexture(video);
+    const material = new THREE.ShaderMaterial({ ...SCREEN, transparent: true, depthWrite: false, uniforms: { map: { value: tex }, built: { value: 0 } } });
+    const group = new THREE.Group();
+    group.position.set(x, 1.3, z);
+    group.rotation.y = turn;
+    group.add(new THREE.Mesh(new THREE.PlaneGeometry(2.4, 1.35), material));
+    // Paper behind the picture, so the ground and the dot grid don't show through the footage
+    const backing = faces([-1.2, -0.675, -0.01, 1.2, -0.675, -0.01, 1.2, 0.675, -0.01, -1.2, -0.675, -0.01, 1.2, 0.675, -0.01, -1.2, 0.675, -0.01]);
+    group.add(backing);
+    const bezel = [];
+    poly(bezel, [[-1.26, 0.74, 0], [1.26, 0.74, 0], [1.26, -0.74, 0], [-1.26, -0.74, 0]]);
+    poly(bezel, [[-1.3, 0.78, -0.02], [1.3, 0.78, -0.02], [1.3, -0.78, -0.02], [-1.3, -0.78, -0.02]]);
+    for (const [cx, cy] of [[-1.26, 0.74], [1.26, 0.74], [1.26, -0.74], [-1.26, -0.74]]) seg(bezel, [cx, cy, 0], [cx * 1.032, cy * 1.054, -0.02]);
+    seg(bezel, [0, -0.78, -0.02], [0, -1.05, -0.02]);
+    const frame = wire(bezel, 0.8);
+    group.add(frame);
+    s.root.add(group);
+    const view = { video, src, material, frame, backing, picture: false };
+    return view;
+  });
+  // The footage is heavy, so it waits until the project is about a screen away. Playing it for a moment gets phones
+  // to hold frames for a paused video, so it can scrub.
+  const near = new IntersectionObserver(([entry]) => {
+    if (!entry.isIntersecting) return;
+    near.disconnect();
+    screens.forEach(({ video, src }) => {
+      video.src = src;
+      if (!reduce) video.play().then(() => video.pause()).catch(() => {});
+    });
+  }, { rootMargin: '100% 0px' });
+  near.observe(document.getElementById('palisade'));
+  const groundPts = [];
+  ditherGround(groundPts, -3.2, 3.2, -2.6, 2.6, 0.1, (x, z) => (Math.hypot(x / 3.1, z / 2.5) < 1 ? 0.15 : 0));
+  const A = [-1.32, 2.15, 0], B = [1.32, 2.15, -0.2], C = [0, 2.95, -0.1];
+  const bez = u => { const v = 1 - u; return [v * v * A[0] + 2 * v * u * C[0] + u * u * B[0], v * v * A[1] + 2 * v * u * C[1] + u * u * B[1], v * v * A[2] + 2 * v * u * C[2] + u * u * B[2]]; };
+  const signal = [];
+  for (let i = 0; i < 28; i += 2) seg(signal, bez(i / 28), bez((i + 1) / 28));
+  const groundObj = dots(groundPts, 2, 0), signalObj = wire(signal, 0.6), pulse = dots([0, 0, 0], 5, 0.9);
+  s.root.add(groundObj, signalObj, pulse);
+  return {
+    ...s,
+    extent: [-2.6, 2.6, 0.2, 2.8, -0.6, 0.6],
+    update(t, built, phase) {
+      // Scrolling brings in the Ambassador's screen, then the Operator's, then the signal between them
+      const seen = [1, smooth(0.22, 0.28, phase), smooth(0.46, 0.52, phase)];
+      // The footage moves only as you scroll, and plays backward going back up (every frame is a keyframe, so seeking is quick)
+      screens.forEach(({ video }) => {
+        const d = video.duration;
+        if (reduce || !d || video.seeking) return;
+        const at = ((t * 0.9) % d + d) % d;
+        if (Math.abs(video.currentTime - at) > 0.04) video.currentTime = at;
+      });
+      groundObj.material.opacity = 0.5 * smooth(0.1, 0.6, built);
+      screens.forEach(({ picture, material, frame, backing }, i) => {
+        reveal(frame, Math.min((built - 0.15 - i * 0.1) / 0.4, seen[i]));
+        const on = smooth(0.4 + i * 0.1, 0.95, built) * seen[i];
+        // Until the footage has a frame to show, the screen stays blank paper rather than solid black
+        material.uniforms.built.value = picture ? on : 0;
+        backing.visible = on > 0.5;
+      });
+      reveal(signalObj, Math.min((built - 0.75) / 0.25, seen[2]));
+      setPositions(pulse, bez((Math.sin(t * 1.2) + 1) / 2));
+      pulse.material.opacity = 0.9 * smooth(0.85, 1, built) * seen[2];
+      s.root.rotation.y = 0.1 * Math.sin(t * 0.15);
+    },
+  };
+}
+
+const SCENES = { interviews, pathways, build, challenge, schoolyard, palisade };
+
+let renderer = null;
+try {
+  renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+} catch {
+  document.querySelectorAll('.stage .fallback').forEach(f => { f.textContent = 'Needs WebGL, which this browser has turned off.'; });
+}
+
+if (renderer) {
+  renderer.setPixelRatio(1);
+  renderer.setClearColor(0x000000, 0);
+  const size = new THREE.Vector2();
+  let raf = 0;
+
+  // Frame a scene as large as its stage allows: keep the camera's angle, aim at the middle of the room the scene says it
+  // needs (its extent, x0 x1 y0 y1 z0 z1), and move in until a corner of that box nears the edge of the picture
+  const corner = new THREE.Vector3();
+  function fit(sc) {
+    const [x0, x1, y0, y1, z0, z1] = sc.extent, dir = sc.home.clone().sub(sc.look);
+    const mid = new THREE.Vector3((x0 + x1) / 2, (y0 + y1) / 2, (z0 + z1) / 2);
+    const place = k => {
+      sc.camera.position.copy(mid).addScaledVector(dir, k);
+      sc.camera.lookAt(mid);
+      sc.camera.updateMatrixWorld();
+    };
+    let lo = 0.2, hi = 4;
+    for (let i = 0; i < 18; i++) {
+      const k = (lo + hi) / 2;
+      place(k);
+      let inside = true;
+      for (const x of [x0, x1]) for (const y of [y0, y1]) for (const z of [z0, z1]) {
+        corner.set(x, y, z).project(sc.camera);
+        if (Math.abs(corner.x) > 0.92 || Math.abs(corner.y) > 0.9 || corner.z > 1) inside = false;
+      }
+      if (inside) hi = k; else lo = k;
+    }
+    place(hi);
+  }
+
+  const stages = [...document.querySelectorAll('.stage')].map(el => {
+    el.querySelector('.fallback')?.remove();
+    const canvas = document.createElement('canvas');
+    el.appendChild(canvas);
+    const keys = (el.dataset.scenes || el.dataset.scene).split(' ');
+    const built = keys.map(k => SCENES[k]());
+    const st = { el, canvas, ctx: canvas.getContext('2d'), keys, scenes: built, cur: built[0], card: el.closest('.project'), w: 0, h: 0, visible: false, tx: 0, ty: 0, ax: 0, ay: 0 };
+    const frame = () => {
+      for (const sc of built) {
+        sc.camera.aspect = st.w / Math.max(1, st.h);
+        sc.camera.updateProjectionMatrix();
+        fit(sc);
+      }
+    };
+    new ResizeObserver(() => {
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      st.w = Math.round(el.clientWidth * dpr);
+      st.h = Math.round(el.clientHeight * dpr);
+      canvas.width = st.w;
+      canvas.height = st.h;
+      frame();
+      draw(st);
+    }).observe(el);
+    el.addEventListener('pointermove', e => {
+      const r = el.getBoundingClientRect();
+      st.ax = ((e.clientX - r.left) / r.width * 2 - 1) * 0.16;
+      st.ay = ((e.clientY - r.top) / r.height * 2 - 1) * 0.08;
+      wake();
+    });
+    el.addEventListener('pointerleave', () => { st.ax = 0; st.ay = 0; wake(); });
+    return st;
+  });
+
+  function draw(st) {
+    if (!st.w || !st.h) return false;
+    // The page script says which scene is on, how far it has built, and how far scrolling has come through it
+    const { scene: key, built, time, phase } = st.card.dataset;
+    if (key && key !== st.key) {
+      const next = st.scenes[st.keys.indexOf(key)];
+      if (next) { st.key = key; st.cur = next; }
+    }
+    st.tx += (st.ax - st.tx) * (reduce ? 1 : 0.12);
+    st.ty += (st.ay - st.ty) * (reduce ? 1 : 0.12);
+    st.cur.tilt.rotation.set(st.ty, st.tx, 0);
+    st.cur.update(reduce ? 0 : parseFloat(time || '0'), parseFloat(built || '0'), parseFloat(phase || '0'));
+    renderer.getSize(size);
+    if (size.x !== st.w || size.y !== st.h) renderer.setSize(st.w, st.h, false);
+    renderer.render(st.cur.scene, st.cur.camera);
+    st.ctx.clearRect(0, 0, st.w, st.h);
+    st.ctx.drawImage(renderer.domElement, 0, 0);
+    // Keep drawing while the tilt settles
+    return Math.abs(st.ax - st.tx) + Math.abs(st.ay - st.ty) > 0.001;
+  }
+  function tick() {
+    raf = 0;
+    // Nothing plays on its own: a frame is drawn when the page scrolls, and more follow only while the tilt settles
+    let more = false;
+    for (const st of stages) if (st.visible && draw(st)) more = true;
+    if (more && !reduce) raf = requestAnimationFrame(tick);
+  }
+  function wake() { if (!raf) raf = requestAnimationFrame(tick); }
+  document.addEventListener('progress', wake);
+  const io = new IntersectionObserver(entries => {
+    for (const e of entries) {
+      const st = stages.find(s => s.el === e.target);
+      st.visible = e.isIntersecting;
+    }
+    wake();
+  }, { rootMargin: '60px 0px' });
+  stages.forEach(st => io.observe(st.el));
+}
+</script>
+</body>
+</html>
